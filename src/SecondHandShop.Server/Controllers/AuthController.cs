@@ -1,6 +1,7 @@
 using SecondHandShop.Server.Data;
 using SecondHandShop.Shared.DTOs;
 using SecondHandShop.Shared.Models;
+using SecondHandShop.Server.Models;
 using SecondHandShop.Server.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace SecondHandShop.Controllers;
+namespace SecondHandShop.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -34,66 +35,87 @@ public class AuthController : ControllerBase
   [HttpPost("register")]
   public async Task<ActionResult<AuthResponseDto>> Register(RegisterUserDto dto)
   {
-    // TODO: Implementera registrering
-    // 1. Kontrollera att e-postadressen inte redan finns med FindByEmailAsync
-    //    — returnera Conflict("E-postadressen används redan.") om den finns
-    // 2. Skapa ett ApplicationUser-objekt med UserName = Email
-    // 3. Anropa _userManager.CreateAsync(user, dto.Password)
-    // 4. Om !result.Succeeded — returnera BadRequest med result.Errors
-    // 5. Lägg till rollen "User" med AddToRoleAsync (rollen skapas i Program.cs)
-    // 6. Hämta roller med GetRolesAsync
-    // 7. Generera access token med _tokenService.GenerateAccessToken
-    // 8. Skapa refresh token med _tokenService.CreateRefreshTokenAsync
-    // 9. Returnera Ok med ett nytt AuthResponseDto-objekt
+    var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+    if (existingUser != null) return Conflict("E-postadressen används redan.");
 
-    throw new NotImplementedException();
+    var user = new ApplicationUser
+    {
+      UserName = dto.Email,
+      Email = dto.Email,
+      FirstName = dto.FirstName,
+      LastName = dto.LastName
+    };
+
+    var result = await _userManager.CreateAsync(user, dto.Password);
+    if (!result.Succeeded) return BadRequest(result.Errors);
+
+    await _userManager.AddToRoleAsync(user, "User");
+
+    return await CreateAuthResponse(user);
   }
 
   [HttpPost("login")]
   public async Task<ActionResult<AuthResponseDto>> Login(LoginDto dto)
   {
-    // TODO: Implementera inloggning
-    // 1. Hitta användaren med FindByEmailAsync
-    //    — returnera Unauthorized("Felaktig e-postadress eller lösenord.") om null
-    //    (VIKTIGT: samma meddelande för fel e-post OCH fel lösenord — undviker user enumeration)
-    // 2. Anropa _signInManager.CheckPasswordSignInAsync(user, dto.Password, lockoutOnFailure: true)
-    // 3. Kontrollera result.IsLockedOut — returnera Unauthorized med lockout-meddelande
-    // 4. Kontrollera !result.Succeeded — returnera Unauthorized
-    // 5. Hämta roller, generera tokens och returnera AuthResponseDto
-    //    (samma struktur som i Register)
+    var user = await _userManager.FindByEmailAsync(dto.Email);
+    if (user == null) return Unauthorized("Felaktig e-postadress eller lösenord.");
 
-    throw new NotImplementedException();
+    var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, lockoutOnFailure: true);
+
+    if (result.IsLockedOut) return Unauthorized("Kontot är låst. Försök igen senare.");
+    if (!result.Succeeded) return Unauthorized("Felaktig e-postadress eller lösenord.");
+
+    return await CreateAuthResponse(user);
   }
 
   [HttpPost("refresh")]
   public async Task<ActionResult<AuthResponseDto>> Refresh([FromBody] string refreshToken)
   {
-    // TODO: Implementera token-refresh
-    // 1. Hitta refresh token i databasen med Include(rt => rt.User)
-    //    Använd: _context.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == refreshToken)
-    // 2. Kontrollera att token finns och är aktiv (token.IsActive)
-    //    — returnera Unauthorized("Ogiltig eller utgången refresh token.") annars
-    // 3. Revocera den gamla token: token.IsRevoked = true, token.RevokedAt = DateTime.UtcNow
-    // 4. Hämta användaren, generera nya tokens
-    // 5. Spara ändringarna med SaveChangesAsync
-    // 6. Returnera AuthResponseDto med nya tokens
+    var storedToken = await _context.Set<RefreshToken>()
+        .Include(rt => rt.User)
+        .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 
-    throw new NotImplementedException();
+    if (storedToken == null || !storedToken.IsActive)
+      return Unauthorized("Ogiltig eller utgången refresh token.");
+
+    storedToken.IsRevoked = true;
+    storedToken.RevokedAt = DateTime.UtcNow;
+
+    return await CreateAuthResponse(storedToken.User);
   }
 
   [HttpPost("logout")]
   [Authorize]
   public async Task<IActionResult> Logout([FromBody] string refreshToken)
   {
-    // TODO: Implementera logout
-    // 1. Hämta inloggad användares ID ur claims:
-    //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    // 2. Hitta refresh token i databasen som tillhör denna användare
-    //    (kontrollera både Token och UserId för säkerhet)
-    // 3. Returnera NotFound om token inte hittas
-    // 4. Revocera token och spara
-    // 5. Returnera NoContent()
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-    throw new NotImplementedException();
+    var token = await _context.Set<RefreshToken>()
+        .FirstOrDefaultAsync(rt => rt.Token == refreshToken && rt.UserId == userId);
+
+    if (token == null) return NotFound();
+    token.IsRevoked = true;
+    token.RevokedAt = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+    return NoContent();
+  }
+
+  private async Task<AuthResponseDto> CreateAuthResponse(ApplicationUser user)
+  {
+    var roles = await _userManager.GetRolesAsync(user);
+
+    var accessToken = _tokenService.CreateToken(user, roles);
+    var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
+
+    return new AuthResponseDto(
+        accessToken,
+        refreshToken.Token,
+        DateTime.UtcNow.AddMinutes(15),
+        user.Email!,
+        user.FirstName,
+        user.LastName,
+        roles
+    );
   }
 }

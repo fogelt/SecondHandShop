@@ -5,7 +5,6 @@ namespace SecondHandShop.Server.Interfaces;
 
 public interface ITokenService
 {
-  string GenerateAccessToken(ApplicationUser user, IList<string> roles);
-  string GenerateRefreshToken();
+  string CreateToken(ApplicationUser user, IList<string> roles);
   Task<RefreshToken> CreateRefreshTokenAsync(ApplicationUser user);
 }

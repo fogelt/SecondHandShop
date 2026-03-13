@@ -1,4 +1,7 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using SecondHandShop.Shared.Models;
 using SecondHandShop.Server.Data;
 
@@ -8,6 +11,7 @@ public static class IdentityServiceExtensions
 {
   public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
   {
+    // Identity config
     services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
       options.Password.RequiredLength = 8;
@@ -20,6 +24,27 @@ public static class IdentityServiceExtensions
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+    // JWT auth setup
+    services.AddAuthentication(options =>
+    {
+      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!)),
+        ValidateIssuer = true,
+        ValidIssuer = config["Jwt:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = config["Jwt:Audience"],
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+      };
+    });
 
     return services;
   }

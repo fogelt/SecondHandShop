@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SecondHandShop.Server.Extensions;
 using SecondHandShop.Server.Data;
+using SecondHandShop.Server.Interfaces;
+using SecondHandShop.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 
