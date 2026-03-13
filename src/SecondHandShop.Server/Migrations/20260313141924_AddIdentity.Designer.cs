@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SecondHandShop.Shared.Data;
+using SecondHandShop.Server.Data;
 
 #nullable disable
 
-namespace SecondHandShop.Shared.Migrations
+namespace SecondHandShop.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260313140554_AddIdentity")]
+    [Migration("20260313141924_AddIdentity")]
     partial class AddIdentity
     {
         /// <inheritdoc />

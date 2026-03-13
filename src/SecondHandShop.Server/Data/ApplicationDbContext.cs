@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SecondHandShop.Shared.Models;
 
-namespace SecondHandShop.Shared.Data;
+namespace SecondHandShop.Server.Data;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {

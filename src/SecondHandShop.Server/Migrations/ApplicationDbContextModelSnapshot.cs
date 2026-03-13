@@ -3,11 +3,11 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SecondHandShop.Shared.Data;
+using SecondHandShop.Server.Data;
 
 #nullable disable
 
-namespace SecondHandShop.Shared.Migrations
+namespace SecondHandShop.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot

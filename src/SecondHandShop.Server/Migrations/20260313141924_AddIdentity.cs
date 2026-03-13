@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SecondHandShop.Shared.Migrations
+namespace SecondHandShop.Server.Migrations
 {
     /// <inheritdoc />
     public partial class AddIdentity : Migration
