@@ -3,6 +3,7 @@ using SecondHandShop.Server.Extensions;
 using SecondHandShop.Server.Data;
 using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Server.Services;
+using SecondHandShop.Server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 var app = builder.Build();
 
