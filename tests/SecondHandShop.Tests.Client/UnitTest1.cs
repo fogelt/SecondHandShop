@@ -1,4 +1,4 @@
-﻿namespace tests;
+﻿namespace SecondHandShop.Tests.Client;
 
 public class UnitTest1
 {

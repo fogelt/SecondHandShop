@@ -1,2 +1,12 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SecondHandShop.Client/SecondHandShop.Client.csproj" />
+    <Project Path="src/SecondHandShop.Server/SecondHandShop.Server.csproj" />
+    <Project Path="src/SecondHandShop.Shared/SecondHandShop.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SecondHandShop.Tests.Client/SecondHandShop.Tests.Client.csproj" />
+    <Project Path="tests/SecondHandShop.Tests.Server/SecondHandShop.Tests.Server.csproj" />
+    <Project Path="tests/SecondHandShop.Tests.Shared/SecondHandShop.Tests.Shared.csproj" />
+  </Folder>
 </Solution>
