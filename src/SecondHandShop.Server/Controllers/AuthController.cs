@@ -13,24 +13,16 @@ namespace SecondHandShop.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(
+    UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
+    ITokenService tokenService,
+    ApplicationDbContext context) : ControllerBase
 {
-  private readonly UserManager<ApplicationUser> _userManager;
-  private readonly SignInManager<ApplicationUser> _signInManager;
-  private readonly ITokenService _tokenService;
-  private readonly ApplicationDbContext _context;
-
-  public AuthController(
-      UserManager<ApplicationUser> userManager,
-      SignInManager<ApplicationUser> signInManager,
-      ITokenService tokenService,
-      ApplicationDbContext context)
-  {
-    _userManager = userManager;
-    _signInManager = signInManager;
-    _tokenService = tokenService;
-    _context = context;
-  }
+  private readonly UserManager<ApplicationUser> _userManager = userManager;
+  private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+  private readonly ITokenService _tokenService = tokenService;
+  private readonly ApplicationDbContext _context = context;
 
   [HttpPost("register")]
   public async Task<ActionResult<AuthResponseDto>> Register(RegisterUserDto dto)
@@ -55,7 +47,7 @@ public class AuthController : ControllerBase
   }
 
   [HttpPost("login")]
-  public async Task<ActionResult<AuthResponseDto>> Login(LoginDto dto)
+  public async Task<ActionResult<AuthResponseDto>> Login(LoginUserDto dto)
   {
     var user = await _userManager.FindByEmailAsync(dto.Email);
     if (user == null) return Unauthorized("Felaktig e-postadress eller lösenord.");

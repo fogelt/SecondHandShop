@@ -1,5 +1,7 @@
 namespace SecondHandShop.Shared.DTOs;
 
-public record LoginDto(
-    string Email,
-    string Password);
+public class LoginUserDto
+{
+  public string Email { get; set; } = "";
+  public string Password { get; set; } = "";
+}

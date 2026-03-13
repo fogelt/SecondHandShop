@@ -1,7 +1,73 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using SecondHandShop.Shared.DTOs
 
-<PageTitle>Home</PageTitle>
+<PageTitle>SecondHandShop - Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="d-flex flex-column align-items-center justify-content-center vh-100">
+  <AuthorizeView Context="auth">
+    <Authorized>
+      <div class="text-center">
+        <h1 class="display-4 mb-4">Välkommen tillbaka, @auth.User.Identity?.Name!</h1>
 
-Welcome to your new app.
+        <div class="alert alert-success shadow-sm p-4">
+          <p class="mb-2 text-muted">Dina aktiva roller:</p>
+          @foreach (var claim in auth.User.Claims.Where(c => c.Type == "role" || c.Type ==
+                                        System.Security.Claims.ClaimTypes.Role))
+          {
+            <span class="badge bg-primary fs-6 me-1">@claim.Value</span>
+          }
+        </div>
+
+        <button class="btn btn-outline-danger btn-lg mt-3" @onclick="HandleLogout">
+          Logga ut
+        </button>
+      </div>
+    </Authorized>
+
+    <NotAuthorized>
+      <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <h2 class="fw-bold">SecondHandShop</h2>
+            <p class="text-muted">Logga in på ditt konto</p>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">E-post</label>
+            <input type="email" class="form-control form-control-lg" @bind="loginModel.Email"
+                   placeholder="namn@exempel.se" />
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Lösenord</label>
+            <input type="password" class="form-control form-control-lg" @bind="loginModel.Password" />
+          </div>
+
+          <button class="btn btn-primary btn-lg w-100" @onclick="HandleLogin">
+            Logga in
+          </button>
+
+          @if (!string.IsNullOrEmpty(errorMessage))
+          {
+            <div class="alert alert-danger mt-4 py-2 text-center">@errorMessage</div>
+          }
+        </div>
+      </div>
+    </NotAuthorized>
+  </AuthorizeView>
+</div>
+
+@code {
+  private LoginUserDto loginModel = new();
+  private string? errorMessage;
+
+  private async Task HandleLogin()
+  {
+    // TBD
+  }
+
+  private async Task HandleLogout()
+  {
+    // TBD
+  }
+}
