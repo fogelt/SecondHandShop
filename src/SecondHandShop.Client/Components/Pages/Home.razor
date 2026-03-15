@@ -1,6 +1,9 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Authorization
 @using SecondHandShop.Shared.DTOs
+@using SecondHandShop.Client.Services
+@inject AuthService AuthService
+@rendermode InteractiveServer
 
 <PageTitle>SecondHandShop - Home</PageTitle>
 
@@ -8,12 +11,14 @@
   <AuthorizeView Context="auth">
     <Authorized>
       <div class="text-center">
-        <h1 class="display-4 mb-4">Välkommen tillbaka, @auth.User.Identity?.Name!</h1>
+        <h1 class="display-4 mb-4">
+          Välkommen tillbaka, @(auth.User.FindFirst("firstname")?.Value ?? auth.User.Identity?.Name)!
+        </h1>
 
         <div class="alert alert-success shadow-sm p-4">
           <p class="mb-2 text-muted">Dina aktiva roller:</p>
           @foreach (var claim in auth.User.Claims.Where(c => c.Type == "role" || c.Type ==
-                                        System.Security.Claims.ClaimTypes.Role))
+                              System.Security.Claims.ClaimTypes.Role))
           {
             <span class="badge bg-primary fs-6 me-1">@claim.Value</span>
           }
@@ -63,11 +68,24 @@
 
   private async Task HandleLogin()
   {
-    // TBD
+    errorMessage = null;
+    try
+    {
+      var success = await AuthService.Login(loginModel);
+      if (!success)
+      {
+        errorMessage = "Inloggningen misslyckades. Kontrollera uppgifterna.";
+      }
+    }
+    catch (Exception ex)
+    {
+      errorMessage = "Ett oväntat fel uppstod vid anslutning till servern.";
+      Console.WriteLine(ex.Message);
+    }
   }
 
   private async Task HandleLogout()
   {
-    // TBD
+    await AuthService.Logout();
   }
 }
