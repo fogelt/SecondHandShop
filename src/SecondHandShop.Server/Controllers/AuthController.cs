@@ -1,79 +1,40 @@
-using SecondHandShop.Server.Data;
 using SecondHandShop.Shared.DTOs;
-using SecondHandShop.Shared.Models;
-using SecondHandShop.Server.Models;
 using SecondHandShop.Server.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace SecondHandShop.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
-    ITokenService tokenService,
-    ApplicationDbContext context) : ControllerBase
+public class AuthController(IAuthRepository authRepo) : ControllerBase
 {
-  private readonly UserManager<ApplicationUser> _userManager = userManager;
-  private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-  private readonly ITokenService _tokenService = tokenService;
-  private readonly ApplicationDbContext _context = context;
-
   [HttpPost("register")]
   public async Task<ActionResult<AuthResponseDto>> Register(RegisterUserDto dto)
   {
-    var existingUser = await _userManager.FindByEmailAsync(dto.Email);
-    if (existingUser != null) return Conflict("E-postadressen används redan.");
+    if (await authRepo.GetUserByEmailAsync(dto.Email) != null)
+      return Conflict("E-postadressen används redan.");
 
-    var user = new ApplicationUser
-    {
-      UserName = dto.Email,
-      Email = dto.Email,
-      FirstName = dto.FirstName,
-      LastName = dto.LastName
-    };
-
-    var result = await _userManager.CreateAsync(user, dto.Password);
+    var result = await authRepo.RegisterAsync(dto);
     if (!result.Succeeded) return BadRequest(result.Errors);
 
-    await _userManager.AddToRoleAsync(user, "User");
-
-    return await CreateAuthResponse(user);
+    var loginDto = new LoginUserDto { Email = dto.Email, Password = dto.Password };
+    return await Login(loginDto);
   }
 
   [HttpPost("login")]
   public async Task<ActionResult<AuthResponseDto>> Login(LoginUserDto dto)
   {
-    var user = await _userManager.FindByEmailAsync(dto.Email);
-    if (user == null) return Unauthorized("Felaktig e-postadress eller lösenord.");
-
-    var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, lockoutOnFailure: true);
-
-    if (result.IsLockedOut) return Unauthorized("Kontot är låst. Försök igen senare.");
-    if (!result.Succeeded) return Unauthorized("Felaktig e-postadress eller lösenord.");
-
-    return await CreateAuthResponse(user);
+    var response = await authRepo.LoginAsync(dto);
+    return response == null ? Unauthorized("Felaktig e-post eller lösenord.") : Ok(response);
   }
 
   [HttpPost("refresh")]
   public async Task<ActionResult<AuthResponseDto>> Refresh([FromBody] string refreshToken)
   {
-    var storedToken = await _context.Set<RefreshToken>()
-        .Include(rt => rt.User)
-        .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
-
-    if (storedToken == null || !storedToken.IsActive)
-      return Unauthorized("Ogiltig eller utgången refresh token.");
-
-    storedToken.IsRevoked = true;
-    storedToken.RevokedAt = DateTime.UtcNow;
-
-    return await CreateAuthResponse(storedToken.User);
+    var response = await authRepo.RefreshTokenAsync(refreshToken);
+    return response == null ? Unauthorized("Ogiltig token.") : Ok(response);
   }
 
   [HttpPost("logout")]
@@ -81,33 +42,7 @@ public class AuthController(
   public async Task<IActionResult> Logout([FromBody] string refreshToken)
   {
     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-    var token = await _context.Set<RefreshToken>()
-        .FirstOrDefaultAsync(rt => rt.Token == refreshToken && rt.UserId == userId);
-
-    if (token == null) return NotFound();
-    token.IsRevoked = true;
-    token.RevokedAt = DateTime.UtcNow;
-
-    await _context.SaveChangesAsync();
-    return NoContent();
-  }
-
-  private async Task<AuthResponseDto> CreateAuthResponse(ApplicationUser user)
-  {
-    var roles = await _userManager.GetRolesAsync(user);
-
-    var accessToken = _tokenService.CreateToken(user, roles);
-    var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
-
-    return new AuthResponseDto(
-        accessToken,
-        refreshToken.Token,
-        DateTime.UtcNow.AddMinutes(15),
-        user.Email!,
-        user.FirstName,
-        user.LastName,
-        roles
-    );
+    var success = await authRepo.LogoutAsync(refreshToken, userId!);
+    return success ? NoContent() : NotFound();
   }
 }
