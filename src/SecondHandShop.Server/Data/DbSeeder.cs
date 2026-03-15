@@ -1,5 +1,6 @@
 using SecondHandShop.Shared.Models;
 using Microsoft.AspNetCore.Identity;
+using SecondHandShop.Shared.Enums;
 
 namespace SecondHandShop.Server.Data;
 
@@ -18,11 +19,11 @@ public static class DbSeeder
         await roleManager.CreateAsync(new IdentityRole(role));
     }
 
-    await CreateUserWithRole(userManager, "admin@secondhand.se", "Admin@12345", "Admin", "Boss");
-    await CreateUserWithRole(userManager, "user@secondhand.se", "User@12345", "Standard", "User");
+    await CreateUserWithRole(userManager, "admin@secondhand.se", "Admin@12345", "Admin", "Boss", Roles.Admin);
+    await CreateUserWithRole(userManager, "user@secondhand.se", "User@12345", "Standard", "User", Roles.User);
   }
 
-  private static async Task CreateUserWithRole(UserManager<ApplicationUser> um, string email, string password, string first, string last, string role = "User")
+  private static async Task CreateUserWithRole(UserManager<ApplicationUser> um, string email, string password, string first, string last, Roles role = Roles.User)
   {
     if (await um.FindByEmailAsync(email) == null)
     {
@@ -35,7 +36,7 @@ public static class DbSeeder
         LastName = last
       };
       var result = await um.CreateAsync(user, password);
-      if (result.Succeeded) await um.AddToRoleAsync(user, role);
+      if (result.Succeeded) await um.AddToRoleAsync(user, role.ToString());
     }
   }
 }
