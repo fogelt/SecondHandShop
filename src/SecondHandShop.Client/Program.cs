@@ -20,9 +20,15 @@ builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
 
 builder.Services.AddScoped<AuthService>();
 
-builder.Services.AddScoped(sp => new HttpClient
+builder.Services.AddScoped(sp =>
 {
-    BaseAddress = new Uri("http://localhost:5141")
+    var config = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["ApiBaseUrl"];
+    if (string.IsNullOrEmpty(baseUrl))
+    {
+        baseUrl = "http://localhost:5141";
+    }
+    return new HttpClient { BaseAddress = new Uri(baseUrl) };
 });
 
 var app = builder.Build();
