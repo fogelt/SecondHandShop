@@ -4,9 +4,9 @@
 @inject AuthService AuthService
 @rendermode InteractiveServer
 
-<PageTitle>Login</PageTitle>
+<PageTitle>Logga in</PageTitle>
 
-<div class="d-flex flex-column align-items-center vh-100">
+<div class="d-flex flex-column align-items-center">
   <AuthorizeView Context="auth">
     <Authorized>
       <div class="text-center">
@@ -17,9 +17,9 @@
         <div class="alert alert-success shadow-sm p-4">
           <p class="mb-2 text-muted">Dina aktiva roller:</p>
           @foreach (var claim in auth.User.Claims.Where(c => c.Type == "role" || c.Type ==
-                                                                                                                        System.Security.Claims.ClaimTypes.Role))
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                  System.Security.Claims.ClaimTypes.Role))
           {
-            <span class="badge bg-primary fs-6 me-1">@claim.Value</span>
+            <span class="badge bg-dark fs-6 me-1">@claim.Value</span>
           }
         </div>
 
@@ -30,23 +30,22 @@
     </Authorized>
 
     <NotAuthorized>
-      <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
-        <div class="card-body p-5">
-          <div class="text-center mb-4">
-            <h2 class="fw-bold">Login</h2>
-          </div>
+      <div class="card shadow-lg" style="width: 100%; max-width: 400px;">
+        <div class="text-center mb-4 pt-3">
+          <h2 style="letter-spacing: 4px;">LOGGA IN</h2>
+        </div>
+        <div class="p-4">
 
           <div class="mb-3">
             <label class="form-label">E-post</label>
-            <input type="email" class="form-control form-control-lg" @bind="loginModel.Email"
-                   placeholder="namn@exempel.se" />
+            <input type="email" class="form-control form-control-lg" @bind="loginModel.Email" />
           </div>
           <div class="mb-4">
             <label class="form-label">Lösenord</label>
             <input type="password" class="form-control form-control-lg" @bind="loginModel.Password" />
           </div>
 
-          <button class="btn btn-primary btn-lg w-100" @onclick="HandleLogin">
+          <button class="btn btn-dark btn-lg w-100" @onclick="HandleLogin">
             Logga in
           </button>
 
