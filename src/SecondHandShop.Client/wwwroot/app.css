@@ -1,0 +1,10 @@
+.nav-link {
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.nav-link.active {
+    /* var(--bs-dark) or var(--bs-gray-700) are standard Bootstrap gray variables */
+    border-bottom: 2px solid var(--bs-dark) !important;
+    color: var(--bs-dark) !important;
+}

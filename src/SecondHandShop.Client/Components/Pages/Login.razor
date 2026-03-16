@@ -1,13 +1,12 @@
-﻿@page "/"
+@page "/login"
 @using Microsoft.AspNetCore.Components.Authorization
-@using SecondHandShop.Shared.DTOs
-@using SecondHandShop.Client.Services
+
 @inject AuthService AuthService
 @rendermode InteractiveServer
 
-<PageTitle>SecondHandShop - Home</PageTitle>
+<PageTitle>Login</PageTitle>
 
-<div class="d-flex flex-column align-items-center justify-content-center vh-100">
+<div class="d-flex flex-column align-items-center vh-100">
   <AuthorizeView Context="auth">
     <Authorized>
       <div class="text-center">
@@ -18,7 +17,7 @@
         <div class="alert alert-success shadow-sm p-4">
           <p class="mb-2 text-muted">Dina aktiva roller:</p>
           @foreach (var claim in auth.User.Claims.Where(c => c.Type == "role" || c.Type ==
-                              System.Security.Claims.ClaimTypes.Role))
+                                                                                                                        System.Security.Claims.ClaimTypes.Role))
           {
             <span class="badge bg-primary fs-6 me-1">@claim.Value</span>
           }
@@ -34,8 +33,7 @@
       <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
         <div class="card-body p-5">
           <div class="text-center mb-4">
-            <h2 class="fw-bold">SecondHandShop</h2>
-            <p class="text-muted">Logga in på ditt konto</p>
+            <h2 class="fw-bold">Login</h2>
           </div>
 
           <div class="mb-3">
