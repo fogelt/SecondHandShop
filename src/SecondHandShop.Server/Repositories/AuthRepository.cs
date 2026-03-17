@@ -17,7 +17,7 @@ public class AuthRepository(
   public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
       => await userManager.FindByEmailAsync(email);
 
-  public async Task<IdentityResult> RegisterAsync(RegisterUserDto dto)
+  public async Task<IdentityResult> RegisterAsync(RegisterRequestDto dto)
   {
     var user = new ApplicationUser
     {
@@ -35,7 +35,7 @@ public class AuthRepository(
     return result;
   }
 
-  public async Task<AuthResponseDto?> LoginAsync(LoginUserDto dto)
+  public async Task<AuthResponseDto?> LoginAsync(LoginRequestDto dto)
   {
     var user = await userManager.FindByEmailAsync(dto.Email);
     if (user == null) return null;

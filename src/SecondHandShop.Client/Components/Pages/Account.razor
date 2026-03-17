@@ -1,0 +1,17 @@
+@page "/account"
+@using Microsoft.AspNetCore.Components.Authorization
+
+@rendermode InteractiveServer
+
+<PageTitle>Konto</PageTitle>
+
+<div class="container d-flex flex-column align-items-center py-5">
+  <AuthorizeView Context="auth">
+    <Authorized>
+      <UserDashboard />
+    </Authorized>
+    <NotAuthorized>
+      <AuthModal />
+    </NotAuthorized>
+  </AuthorizeView>
+</div>

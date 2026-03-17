@@ -11,20 +11,20 @@ namespace SecondHandShop.Server.Controllers;
 public class AuthController(IAuthRepository authRepo) : ControllerBase
 {
   [HttpPost("register")]
-  public async Task<ActionResult<AuthResponseDto>> Register(RegisterUserDto dto)
+  public async Task<ActionResult<AuthResponseDto>> Register(RegisterRequestDto request)
   {
-    if (await authRepo.GetUserByEmailAsync(dto.Email) != null)
+    if (await authRepo.GetUserByEmailAsync(request.Email) != null)
       return Conflict("E-postadressen används redan.");
 
-    var result = await authRepo.RegisterAsync(dto);
+    var result = await authRepo.RegisterAsync(request);
     if (!result.Succeeded) return BadRequest(result.Errors);
 
-    var loginDto = new LoginUserDto { Email = dto.Email, Password = dto.Password };
-    return await Login(loginDto);
+    var loginRequest = new LoginRequestDto { Email = request.Email, Password = request.Password };
+    return await Login(loginRequest);
   }
 
   [HttpPost("login")]
-  public async Task<ActionResult<AuthResponseDto>> Login(LoginUserDto dto)
+  public async Task<ActionResult<AuthResponseDto>> Login(LoginRequestDto dto)
   {
     var response = await authRepo.LoginAsync(dto);
     return response == null ? Unauthorized("Felaktig e-post eller lösenord.") : Ok(response);

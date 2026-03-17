@@ -1,0 +1,51 @@
+@inject NavigationManager Nav
+
+<div class="col-md-4">
+    <div class="card h-100 shadow-sm border-0 dashboard-card p-3" @onclick="Navigate">
+        <div class="card-body text-center">
+            <div class="icon-box mb-3 mx-auto">
+                <i class="bi @Icon fs-1 text-dark"></i>
+            </div>
+            <h5 class="card-title fw-bold">@Title</h5>
+            <p class="card-text text-muted small">@Description</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Description { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Icon { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Url { get; set; } = string.Empty;
+
+    private void Navigate() => Nav.NavigateTo(Url);
+}
+
+<style>
+    .dashboard-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 15px;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, .1) !important;
+        background-color: #fcfcfc;
+    }
+
+    .icon-box {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+    }
+
+    .dashboard-card:hover .icon-box {
+        background-color: #e9ecef;
+    }
+</style>

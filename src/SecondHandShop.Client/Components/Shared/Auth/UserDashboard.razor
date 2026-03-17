@@ -1,0 +1,56 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthService AuthService
+
+<div class="container py-4">
+  @if (User != null)
+  {
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold" style="letter-spacing: 1px;">
+        Hej, @(User.FindFirst("firstname")?.Value ?? User.Identity?.Name)!
+      </h1>
+      <p class="text-muted text-uppercase fw-light" style="letter-spacing: 1px;">
+        Vad behöver du hjälp med?
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <DashboardCard Title="Min Varukorg" Description="Se dina sparade fynd och gå till kassan." Icon="bi-cart3"
+                     Url="cart" />
+
+      <DashboardCard Title="Inställningar" Description="Hantera din profil, e-post och lösenord." Icon="bi-person-gear"
+                     Url="settings" />
+
+      <DashboardCard Title="Mina Order" Description="Se historik och spåra dina pågående paket." Icon="bi-box-seam"
+                     Url="orders" />
+    </div>
+
+    <div class="mt-5 text-center">
+      <div class="mb-3">
+        @foreach (var claim in User.Claims.Where(c => c.Type == "role" || c.Type == ClaimTypes.Role))
+        {
+          <span class="badge rounded-pill bg-light text-dark border px-3 py-2 me-1">
+            <i class="bi bi-shield-check me-1"></i> @claim.Value
+          </span>
+        }
+      </div>
+
+      <button class="btn btn-dark px-5" @onclick="HandleLogout">
+        <i class="bi bi-box-arrow-right me-2"></i>Logga ut
+      </button>
+    </div>
+  }
+</div>
+
+@code {
+  [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+  private ClaimsPrincipal? User;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var authState = await AuthStateTask;
+    User = authState.User;
+  }
+
+  private async Task HandleLogout() => await AuthService.Logout();
+}

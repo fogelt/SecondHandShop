@@ -1,0 +1,124 @@
+@inject AuthService AuthService
+
+@if (showLogin)
+{
+  <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
+    <div class="text-center mb-2 pt-4">
+      <h2 style="letter-spacing: 4px;">LOGGA IN</h2>
+    </div>
+    <div class="p-4">
+      <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="login-form">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+          <label class="form-label">E-post</label>
+          <InputText type="email" class="form-control form-control-lg" @bind-Value="loginModel.Email" />
+          <ValidationMessage For="@(() => loginModel.Email)" class="text-danger small" />
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Lösenord</label>
+          <InputText type="password" class="form-control form-control-lg" @bind-Value="loginModel.Password" />
+          <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small" />
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-lg w-100">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Logga in
+        </button>
+      </EditForm>
+
+      <div class="mt-3 text-center">
+        <button class="btn btn-link text-decoration-none text-dark" @onclick="ToggleView">
+          Inget konto? Registrera dig här
+        </button>
+      </div>
+
+      @if (!string.IsNullOrEmpty(errorMessage))
+      {
+        <div class="alert alert-danger mt-4 py-2 text-center small">@errorMessage</div>
+      }
+    </div>
+  </div>
+}
+else
+{
+  <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
+    <div class="text-center mb-2 pt-4">
+      <h2 style="letter-spacing: 4px;">REGISTRERING</h2>
+    </div>
+    <div class="p-4">
+      <EditForm Model="registerModel" OnValidSubmit="HandleRegister" FormName="register-form">
+        <DataAnnotationsValidator />
+
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label">Förnamn</label>
+            <InputText class="form-control form-control-lg" @bind-Value="registerModel.FirstName" />
+            <ValidationMessage For="@(() => registerModel.FirstName)" class="text-danger small" />
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label">Efternamn</label>
+            <InputText class="form-control form-control-lg" @bind-Value="registerModel.LastName" />
+            <ValidationMessage For="@(() => registerModel.LastName)" class="text-danger small" />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">E-post</label>
+          <InputText type="email" class="form-control form-control-lg" @bind-Value="registerModel.Email" />
+          <ValidationMessage For="@(() => registerModel.Email)" class="text-danger small" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Lösenord</label>
+          <InputText type="password" class="form-control form-control-lg" @bind-Value="registerModel.Password" />
+          <ValidationMessage For="@(() => registerModel.Password)" class="text-danger small" />
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-lg w-100 mt-2">Skapa konto</button>
+      </EditForm>
+
+      <div class="mt-3 text-center">
+        <button class="btn btn-link text-decoration-none text-dark" @onclick="ToggleView">
+          Har du redan ett konto? Logga in
+        </button>
+      </div>
+
+      @if (!string.IsNullOrEmpty(errorMessage))
+      {
+        <div class="alert alert-danger mt-4 py-2 text-center small">@errorMessage</div>
+      }
+    </div>
+  </div>
+}
+
+@code {
+  private LoginRequestDto loginModel = new LoginRequestDto();
+  private RegisterRequestDto registerModel = new RegisterRequestDto();
+  private string? errorMessage;
+  private bool showLogin = true;
+
+  private void ToggleView() => (showLogin, errorMessage) = (!showLogin, null);
+
+  private async Task HandleLogin()
+  {
+    errorMessage = await AuthService.Login(loginModel);
+  }
+
+  private async Task HandleRegister()
+  {
+    errorMessage = null;
+    string? result = await AuthService.Register(registerModel);
+    if (result == null)
+    {
+      LoginRequestDto? autoLoginModel = new LoginRequestDto
+      {
+        Email = registerModel.Email,
+        Password = registerModel.Password
+      };
+
+      await AuthService.Login(autoLoginModel);
+    }
+    else
+    {
+      errorMessage = result;
+    }
+  }
+}
