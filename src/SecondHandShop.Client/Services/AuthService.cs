@@ -8,9 +8,9 @@ namespace SecondHandShop.Client.Services;
 
 public class AuthService(HttpClient http, ILocalStorageService localStorage, AuthenticationStateProvider authStateProvider)
 {
-  public async Task<bool> Login(LoginUserDto loginDto)
+  public async Task<bool> Login(LoginRequestDto request)
   {
-    var response = await http.PostAsJsonAsync("api/auth/login", loginDto);
+    var response = await http.PostAsJsonAsync("api/auth/login", request);
 
     if (!response.IsSuccessStatusCode) return false;
 
@@ -21,6 +21,14 @@ public class AuthService(HttpClient http, ILocalStorageService localStorage, Aut
     await localStorage.SetItemAsync("refreshToken", result.RefreshToken);
 
     ((CustomAuthStateProvider)authStateProvider).NotifyUserLogin(result.AccessToken);
+    return true;
+  }
+
+  public async Task<bool> Register(RegisterRequestDto request)
+  {
+    var response = await http.PostAsJsonAsync("api/auth/register", request);
+
+    if (!response.IsSuccessStatusCode) return false;
     return true;
   }
 
