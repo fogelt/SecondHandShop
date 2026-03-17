@@ -9,15 +9,15 @@
       Välkommen tillbaka, @(User.FindFirst("firstname")?.Value ?? User.Identity?.Name)!
     </h1>
 
-    <div class="alert alert-success shadow-sm p-4">
+    <div class="card p-4">
       <p class="mb-2 text-muted">Dina aktiva roller:</p>
       @foreach (var claim in User.Claims.Where(c => c.Type == "role" || c.Type == ClaimTypes.Role))
       {
-        <span class="badge bg-dark fs-6 me-1">@claim.Value</span>
+        <p>@claim.Value</p>
       }
     </div>
 
-    <button class="btn btn-outline-danger btn-lg mt-3" @onclick="HandleLogout">
+    <button class="btn btn-dark btn-lg mt-3" @onclick="HandleLogout">
       Logga ut
     </button>
   }

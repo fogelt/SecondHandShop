@@ -1,10 +1,10 @@
 @using Microsoft.AspNetCore.Components.Authorization
-@inject NavigationManager Nav
+@rendermode InteractiveServer
 
 <header class="border-bottom">
 
   <div class="container py-3 text-center">
-    <h1 class="display-6 fw-bold text-dark mb-0" style="letter-spacing: 2px" @onclick='() => Nav.NavigateTo("")'>
+    <h1 class="display-6 fw-bold text-dark mb-0" style="letter-spacing: 2px">
       SECOND HAND SHOP
     </h1>
     <small class="text-muted text-uppercase fw-light" style="letter-spacing: 2px;">
@@ -14,21 +14,17 @@
 
   <nav class="navbar navbar-expand navbar-light">
     <div class="container justify-content-center">
-      <div class="navbar-nav gap-4">
+      <div class="navbar-nav gap-4 align-items-center">
         <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Butik</NavLink>
         <NavLink class="nav-link" href="about">Om oss</NavLink>
-
+        <UserLink />
         <AuthorizeView>
           <Authorized>
             @if (context.User.IsInRole("Admin"))
             {
               <NavLink class="nav-link text-secondary" href="admin">Admin</NavLink>
             }
-            <NavLink class="nav-link" href="profile">Konto</NavLink>
           </Authorized>
-          <NotAuthorized>
-            <NavLink class="nav-link" href="account">Konto</NavLink>
-          </NotAuthorized>
         </AuthorizeView>
       </div>
     </div>
