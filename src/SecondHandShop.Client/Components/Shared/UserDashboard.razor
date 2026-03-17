@@ -1,0 +1,39 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthService AuthService
+
+<div class="text-center">
+  @if (User != null)
+  {
+    <h1 class="display-4 mb-4">
+      Välkommen tillbaka, @(User.FindFirst("firstname")?.Value ?? User.Identity?.Name)!
+    </h1>
+
+    <div class="alert alert-success shadow-sm p-4">
+      <p class="mb-2 text-muted">Dina aktiva roller:</p>
+      @foreach (var claim in User.Claims.Where(c => c.Type == "role" || c.Type == ClaimTypes.Role))
+      {
+        <span class="badge bg-dark fs-6 me-1">@claim.Value</span>
+      }
+    </div>
+
+    <button class="btn btn-outline-danger btn-lg mt-3" @onclick="HandleLogout">
+      Logga ut
+    </button>
+  }
+</div>
+
+@code {
+  [CascadingParameter]
+  private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+
+  private ClaimsPrincipal? User;
+
+  protected override async Task OnInitializedAsync()
+  {
+    AuthenticationState? authState = await AuthStateTask;
+    User = authState.User;
+  }
+
+  private async Task HandleLogout() => await AuthService.Logout();
+}

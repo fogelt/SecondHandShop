@@ -1,7 +1,6 @@
 @page "/account"
 @using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
-@inject AuthService AuthService
+
 @rendermode InteractiveServer
 
 <PageTitle>Konto</PageTitle>
@@ -9,141 +8,10 @@
 <div class="container d-flex flex-column align-items-center py-5">
   <AuthorizeView Context="auth">
     <Authorized>
-      <div class="text-center">
-        <h1 class="display-4 mb-4">
-          Välkommen tillbaka, @(auth.User.FindFirst("firstname")?.Value ?? auth.User.Identity?.Name)!
-        </h1>
-
-        <div class="alert alert-success shadow-sm p-4">
-          <p class="mb-2 text-muted">Dina aktiva roller:</p>
-          @foreach (var claim in auth.User.Claims.Where(c => c.Type == "role" || c.Type == ClaimTypes.Role))
-          {
-            <span class="badge bg-dark fs-6 me-1">@claim.Value</span>
-          }
-        </div>
-
-        <button class="btn btn-outline-danger btn-lg mt-3" @onclick="HandleLogout">
-          Logga ut
-        </button>
-      </div>
+      <UserDashboard />
     </Authorized>
-
     <NotAuthorized>
-      @if (showLogin)
-      {
-        <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
-          <div class="text-center mb-2 pt-4">
-            <h2 style="letter-spacing: 4px;">LOGGA IN</h2>
-          </div>
-          <div class="p-4">
-            <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
-              <DataAnnotationsValidator />
-
-              <div class="mb-3">
-                <label class="form-label">E-post</label>
-                <InputText type="email" class="form-control form-control-lg" @bind-Value="loginModel.Email" />
-                <ValidationMessage For="@(() => loginModel.Email)" class="text-danger small" />
-              </div>
-              <div class="mb-4">
-                <label class="form-label">Lösenord</label>
-                <InputText type="password" class="form-control form-control-lg" @bind-Value="loginModel.Password" />
-                <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small" />
-              </div>
-
-              <button type="submit" class="btn btn-dark btn-lg w-100">Logga in</button>
-            </EditForm>
-
-            <div class="mt-3 text-center">
-              <button class="btn btn-link text-decoration-none text-dark" @onclick="ToggleView">
-                Inget konto? Registrera dig här
-              </button>
-            </div>
-
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-              <div class="alert alert-danger mt-4 py-2 text-center">@errorMessage</div>
-            }
-          </div>
-        </div>
-      }
-      else
-      {
-        <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
-          <div class="text-center mb-2 pt-4">
-            <h2 style="letter-spacing: 4px;">REGISTRERA</h2>
-          </div>
-          <div class="p-4">
-            <EditForm Model="registerModel" OnValidSubmit="HandleRegister">
-              <DataAnnotationsValidator />
-
-              <div class="row">
-                <div class="col-6 mb-3">
-                  <label class="form-label">Förnamn</label>
-                  <InputText class="form-control" @bind-Value="registerModel.FirstName" />
-                  <ValidationMessage For="@(() => registerModel.FirstName)" class="text-danger small" />
-                </div>
-                <div class="col-6 mb-3">
-                  <label class="form-label">Efternamn</label>
-                  <InputText class="form-control" @bind-Value="registerModel.LastName" />
-                  <ValidationMessage For="@(() => registerModel.LastName)" class="text-danger small" />
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">E-post</label>
-                <InputText type="email" class="form-control" @bind-Value="registerModel.Email" />
-                <ValidationMessage For="@(() => registerModel.Email)" class="text-danger small" />
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Lösenord</label>
-                <InputText type="password" class="form-control" @bind-Value="registerModel.Password" />
-                <ValidationMessage For="@(() => registerModel.Password)" class="text-danger small" />
-              </div>
-
-              <button type="submit" class="btn btn-dark btn-lg w-100 mt-2">Skapa konto</button>
-            </EditForm>
-
-            <div class="mt-3 text-center">
-              <button class="btn btn-link text-decoration-none text-dark" @onclick="ToggleView">
-                Har du redan ett konto? Logga in
-              </button>
-            </div>
-
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-              <div class="alert alert-danger mt-4 py-2 text-center">@errorMessage</div>
-            }
-          </div>
-        </div>
-      }
+      <AuthModal />
     </NotAuthorized>
   </AuthorizeView>
 </div>
-
-@code {
-  private LoginRequestDto loginModel = new LoginRequestDto();
-  private RegisterRequestDto registerModel = new RegisterRequestDto();
-  private string? errorMessage;
-  private bool showLogin = true;
-
-  private void ToggleView() => (showLogin, errorMessage) = (!showLogin, null);
-
-  private async Task HandleLogin()
-  {
-    errorMessage = await AuthService.Login(loginModel);
-  }
-
-  private async Task HandleRegister()
-  {
-    string? result = await AuthService.Register(registerModel);
-    if (result == null)
-    {
-      showLogin = true;
-    }
-    else
-    {
-      errorMessage = result;
-    }
-  }
-
-  private async Task HandleLogout() => await AuthService.Logout();
-}
