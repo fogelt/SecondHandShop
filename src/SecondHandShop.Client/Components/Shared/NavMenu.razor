@@ -1,7 +1,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
 
-<header class="border-bottom">
+<header class="card border-bottom shadow-lg">
 
   <div class="container py-3 text-center">
     <h1 class="display-6 fw-bold text-dark mb-0" style="letter-spacing: 2px">
@@ -18,14 +18,6 @@
         <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Butik</NavLink>
         <NavLink class="nav-link" href="about">Om oss</NavLink>
         <UserLink />
-        <AuthorizeView>
-          <Authorized>
-            @if (context.User.IsInRole("Admin"))
-            {
-              <NavLink class="nav-link text-secondary" href="admin">Admin</NavLink>
-            }
-          </Authorized>
-        </AuthorizeView>
       </div>
     </div>
   </nav>

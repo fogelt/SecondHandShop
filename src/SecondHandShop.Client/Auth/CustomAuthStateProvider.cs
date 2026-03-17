@@ -19,7 +19,7 @@ public class CustomAuthStateProvider(ILocalStorageService localStorage, HttpClie
 
       http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-      return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
+      return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt", "name", "role")));
     }
     catch (Exception)
     {
@@ -29,7 +29,7 @@ public class CustomAuthStateProvider(ILocalStorageService localStorage, HttpClie
 
   public void NotifyUserLogin(string token)
   {
-    var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt"));
+    var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt", "name", "role"));
     var authState = Task.FromResult(new AuthenticationState(authenticatedUser));
     NotifyAuthenticationStateChanged(authState);
   }
