@@ -34,7 +34,7 @@ public class TokenService : ITokenService
             new("lastname", user.LastName)
         };
 
-    claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+    claims.AddRange(roles.Select(role => new Claim("role", role)));
 
     var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 

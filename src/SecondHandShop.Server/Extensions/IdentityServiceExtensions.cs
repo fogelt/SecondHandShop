@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using SecondHandShop.Shared.Models;
 using SecondHandShop.Server.Data;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace SecondHandShop.Server.Extensions;
 
@@ -11,6 +12,8 @@ public static class IdentityServiceExtensions
 {
   public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
   {
+    JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
     // Identity config
     services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
@@ -36,6 +39,7 @@ public static class IdentityServiceExtensions
       options.TokenValidationParameters = new TokenValidationParameters
       {
         ValidateIssuerSigningKey = true,
+        RoleClaimType = "role",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!)),
         ValidateIssuer = true,
         ValidIssuer = config["Jwt:Issuer"],

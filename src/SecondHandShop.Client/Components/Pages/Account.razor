@@ -1,14 +1,22 @@
 @page "/account"
 @using Microsoft.AspNetCore.Components.Authorization
+@using SecondHandShop.Shared.Enums
 
 @rendermode InteractiveServer
 
 <PageTitle>Konto</PageTitle>
 
 <div class="container d-flex flex-column align-items-center py-5">
-  <AuthorizeView Context="auth">
+  <AuthorizeView>
     <Authorized>
-      <UserDashboard />
+      @if (context.User.IsInRole("Admin"))
+      {
+        <AdminDashboard />
+      }
+      else
+      {
+        <UserDashboard />
+      }
     </Authorized>
     <NotAuthorized>
       <AuthModal />
