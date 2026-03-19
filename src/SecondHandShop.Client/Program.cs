@@ -7,14 +7,11 @@ using SecondHandShop.Client.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Add Razor Components with Interactive Server Mode
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddBlazoredLocalStorage();
 
-// 2. Configure Authentication with a Default Scheme
-// This prevents the "No DefaultChallengeScheme found" error.
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -23,22 +20,20 @@ builder.Services.AddAuthentication(options =>
     })
     .AddCookie(options =>
     {
-        // Where to send the user if they try to access [Authorize] pages without being logged in
         options.LoginPath = "/login";
     });
 
-// 3. Authorization and State Management
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 
-// 4. Custom Auth Provider Setup
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<CustomAuthStateProvider>());
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AuthUtility>();
 
-// 5. HttpClient Configuration
 builder.Services.AddScoped(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -52,7 +47,6 @@ builder.Services.AddScoped(sp =>
 
 var app = builder.Build();
 
-// 6. Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -62,8 +56,6 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-// 7. IMPORTANT: Middleware Order
-// Authentication MUST come before Authorization
 app.UseStaticFiles();
 app.UseRouting();
 

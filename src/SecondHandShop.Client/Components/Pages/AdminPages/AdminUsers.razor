@@ -71,7 +71,7 @@
   {
     if (firstRender)
     {
-      users = await AuthService.GetAllUsers();
+      users = await UserService.GetAllUsers();
       StateHasChanged();
     }
   }
