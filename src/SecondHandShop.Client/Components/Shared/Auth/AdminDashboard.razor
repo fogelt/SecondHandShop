@@ -2,30 +2,31 @@
 @using System.Security.Claims
 @inject AuthService AuthService
 
-<div class="container py-4">
+<div class="container py-5">
   @if (User != null)
   {
     <div class="text-center mb-5">
-      <h1 class="display-5 fw-bold" style="letter-spacing: 1px;">
-        Hej, @(User.FindFirst("firstname")?.Value ?? User.Identity?.Name)!
+      <h1 class="display-6 fw-bold text-uppercase tracking-widest">
+        Kontrollpanel
       </h1>
-      <p class="text-muted text-uppercase fw-light" style="letter-spacing: 1px;">
-        Vad behöver du hjälp med?
-      </p>
     </div>
 
-    <div class="row g-4">
-      <DashboardCard Title="Användare" Description="Hantera användar-konton." Icon="bi-person-gear" Url="admin-users" />
+    <div class="mx-auto" style="max-width: 600px;">
+      <div class="row g-2">
+        <AdminDashboardCard Title="Användare" Description="Hantera konton och roller." Icon="bi-person-gear"
+                            Url="admin-users" />
 
-      <DashboardCard Title="Produkter" Description="Hantera produkter priser och beskrivningar." Icon="bi-archive"
-                     Url="admin-products" />
+        <AdminDashboardCard Title="Produkter" Description="Hantera sortiment och priser." Icon="bi-archive"
+                            Url="admin-products" />
 
-      <DashboardCard Title="Ordrar" Description="Hantera ordrar och leveranser." Icon="bi-box-seam" Url="admin-orders" />
+        <AdminDashboardCard Title="Ordrar" Description="Översikt av transaktioner." Icon="bi-box-seam"
+                            Url="admin-orders" />
+      </div>
     </div>
 
     <div class="mt-5 text-center">
       <div class="mb-3">
-        @foreach (Claim claim in User.Claims.Where(c => c.Type == "role"))
+        @foreach (var claim in User.Claims.Where(c => c.Type == "role"))
         {
           <span class="badge rounded-pill bg-light text-dark border px-3 py-2 me-1">
             <i class="bi bi-shield-check me-1"></i> @claim.Value
@@ -52,3 +53,9 @@
 
   private async Task HandleLogout() => await AuthService.Logout();
 }
+
+<style>
+  .tracking-widest {
+    letter-spacing: 3px;
+  }
+</style>
