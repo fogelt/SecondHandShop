@@ -3,15 +3,27 @@
     color: var(--bs-dark) !important;
 }
 
-.form-control:focus {
-    border-color: var(--bs-gray-600);
-    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.15); 
+.form-control:focus, 
+.form-select:focus {
+    border-color: var(--bs-gray-600) !important;
+    box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.1) !important; 
     background-color: #fff;
+    outline: 0;
 }
 
-.form-control {
+.form-control, 
+.form-select {
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     border-color: #dddddd;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bs-dark) !important;
+    color: white !important;
+}
+
+.dropdown-item:active {
+    background-color: var(--bs-gray-800) !important;
 }
 
 body {
@@ -19,5 +31,5 @@ body {
     background-color: #efefef;
     background-image: 
         linear-gradient(90deg, #e4e4e4 1px, transparent 5px);
-    background-size: 30px 30px;
+    background-size: 50px 50px;
 }

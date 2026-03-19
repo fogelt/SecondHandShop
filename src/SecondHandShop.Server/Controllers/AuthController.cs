@@ -30,6 +30,45 @@ public class AuthController(IAuthRepository authRepo) : ControllerBase
     return response == null ? Unauthorized("Felaktig e-post eller lösenord.") : Ok(response);
   }
 
+  [HttpDelete("delete/{id}")]
+  [Authorize]
+  public async Task<IActionResult> Delete(string id)
+  {
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isAdmin = User.IsInRole("Admin");
+    if (currentUserId != id && !isAdmin)
+    {
+      return Forbid("Du har inte behörighet att ta bort detta konto.");
+    }
+
+    var result = await authRepo.DeleteUserAsync(id);
+
+    if (!result.Succeeded)
+      return BadRequest(result.Errors);
+
+    return NoContent();
+  }
+
+  [HttpPost("update-role")]
+  [Authorize(Roles = "Admin")]
+  public async Task<IActionResult> UpdateRole([FromBody] UpdateRoleDto dto)
+  {
+    var result = await authRepo.UpdateUserRoleAsync(dto.UserId, dto.NewRole);
+
+    if (!result.Succeeded)
+      return BadRequest(result.Errors);
+
+    return Ok(new { message = $"Användarens roll har uppdaterats till {dto.NewRole}" });
+  }
+
+  [HttpGet("get-all")]
+  [Authorize(Roles = "Admin")]
+  public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+  {
+    var users = await authRepo.GetAllUsersAsync();
+    return Ok(users);
+  }
+
   [HttpPost("refresh")]
   public async Task<ActionResult<AuthResponseDto>> Refresh([FromBody] string refreshToken)
   {

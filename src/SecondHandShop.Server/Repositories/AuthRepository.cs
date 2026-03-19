@@ -14,6 +14,17 @@ public class AuthRepository(
     ITokenService tokenService,
     ApplicationDbContext context) : IAuthRepository
 {
+
+  public async Task<IdentityResult> DeleteUserAsync(string id)
+  {
+    var user = await userManager.FindByIdAsync(id);
+    if (user == null)
+    {
+      return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+    }
+    return await userManager.DeleteAsync(user);
+  }
+
   public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
       => await userManager.FindByEmailAsync(email);
 
@@ -88,5 +99,39 @@ public class AuthRepository(
         user.LastName,
         roles
     );
+  }
+
+  // ADMIN FUNCTIONS //
+  public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+  {
+    var users = await userManager.Users.ToListAsync();
+    var userDtos = new List<UserDto>();
+
+    foreach (var user in users)
+    {
+      userDtos.Add(new UserDto
+      {
+        Id = user.Id,
+        Email = user.Email,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
+        Roles = await userManager.GetRolesAsync(user)
+      });
+    }
+    return userDtos;
+  }
+
+  public async Task<IdentityResult> UpdateUserRoleAsync(string userId, string newRole)
+  {
+    var user = await userManager.FindByIdAsync(userId);
+    if (user == null)
+      return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+
+    var currentRoles = await userManager.GetRolesAsync(user);
+
+    var removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles);
+    if (!removeResult.Succeeded) return removeResult;
+
+    return await userManager.AddToRoleAsync(user, newRole);
   }
 }

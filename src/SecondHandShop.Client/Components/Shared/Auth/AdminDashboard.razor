@@ -2,28 +2,46 @@
 @using System.Security.Claims
 @inject AuthService AuthService
 
-<div class="container py-4">
+<div class="container py-5">
   @if (User != null)
   {
     <div class="text-center mb-5">
-      <h1 class="display-5 fw-bold" style="letter-spacing: 1px;">
-        Hej, @(User.FindFirst("firstname")?.Value ?? User.Identity?.Name)!
+      <h1 class="display-6 fw-bold text-uppercase" style="letter-spacing: 3px;">
+        Admin panel
       </h1>
-      <p class="text-muted text-uppercase fw-light" style="letter-spacing: 1px;">
-        Vad behöver du hjälp med?
-      </p>
     </div>
 
-    <div class="row g-4">
-      <DashboardCard Title="Användare" Description="Hantera användar-konton." Icon="bi-person-gear" Url="admin-users" />
+    <div class="mx-auto mb-5" style="max-width: 600px;">
+      <div class="row g-2">
+        <AdminDashboardCard Title="Användare" Description="Hantera konton och roller." Icon="bi-person-gear"
+                            IsActive="@(currentTab == "users")" OnClick="@(() => SetTab("users"))" />
 
-      <DashboardCard Title="Produkter" Description="Hantera produkter priser och beskrivningar." Icon="bi-archive"
-                     Url="admin-products" />
+        <AdminDashboardCard Title="Produkter" Description="Hantera sortiment och priser." Icon="bi-archive"
+                            IsActive="@(currentTab == "products")" OnClick="@(() => SetTab("products"))" />
 
-      <DashboardCard Title="Ordrar" Description="Hantera ordrar och leveranser." Icon="bi-box-seam" Url="admin-orders" />
+        <AdminDashboardCard Title="Ordrar" Description="Översikt av transaktioner." Icon="bi-box-seam"
+                            IsActive="@(currentTab == "orders")" OnClick="@(() => SetTab("orders"))" />
+      </div>
     </div>
 
-    <div class="mt-5 text-center">
+    <div class="tab-content-area mx-auto" style="max-width: 900px;">
+      @if (currentTab == "users")
+      {
+        <div class="p-5 text-center bg-light rounded-4">
+          <UserManagement />
+        </div>
+      }
+      else if (currentTab == "products")
+      {
+        <div class="p-5 text-center bg-light rounded-4">Produkthantering kommer snart...</div>
+      }
+      else if (currentTab == "orders")
+      {
+        <div class="p-5 text-center bg-light rounded-4">Orderöversikt kommer snart...</div>
+      }
+    </div>
+
+    <div class="mt-5 text-center pt-5">
       <div class="mb-3">
         @foreach (var claim in User.Claims.Where(c => c.Type == "role"))
         {
@@ -32,7 +50,6 @@
           </span>
         }
       </div>
-
       <button class="btn btn-dark px-5" @onclick="HandleLogout">
         <i class="bi bi-box-arrow-right me-2"></i>Logga ut
       </button>
@@ -43,11 +60,17 @@
 @code {
   [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
   private ClaimsPrincipal? User;
+  private string currentTab = "";
 
   protected override async Task OnInitializedAsync()
   {
     var authState = await AuthStateTask;
     User = authState.User;
+  }
+
+  private void SetTab(string tab)
+  {
+    currentTab = (currentTab == tab) ? "" : tab;
   }
 
   private async Task HandleLogout() => await AuthService.Logout();

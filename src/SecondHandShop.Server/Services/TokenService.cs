@@ -38,9 +38,11 @@ public class TokenService : ITokenService
 
     var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
+    var subject = new ClaimsIdentity(claims, "Bearer", "name", "role");
+
     var tokenDescriptor = new SecurityTokenDescriptor
     {
-      Subject = new ClaimsIdentity(claims),
+      Subject = subject,
       Expires = DateTime.UtcNow.AddMinutes(15),
       SigningCredentials = creds,
       Issuer = _config["Jwt:Issuer"],

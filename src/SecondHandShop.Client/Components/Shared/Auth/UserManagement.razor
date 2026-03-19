@@ -1,0 +1,96 @@
+@using SecondHandShop.Shared.DTOs
+@using SecondHandShop.Client.Services
+@inject UserService UserService
+
+<div class="user-management-container">
+    @if (users == null)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-dark"></div>
+        </div>
+    }
+    else
+    {
+        <div class="user-list">
+            @foreach (UserDto user in users)
+            {
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body p-3">
+                        <div class="row align-items-center g-3">
+                            <div class="col-12 col-md-5">
+                                <div class="d-flex align-items-center">
+                                    <img src="/images/avatar-1.webp" class="rounded-circle me-3 border" style="width: 45px; height: 45px;" />
+                                    <div class="text-truncate">
+                                        <h6 class="fw-bold mb-0">@user.FirstName @user.LastName</h6>
+                                        <small class="text-muted">@user.Email</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-md-3">
+                                @foreach (string role in user.Roles)
+                                {
+                                    <span class="badge rounded-pill bg-light text-dark border px-3 py-2 me-1">
+                                        <i class="bi bi-shield-check me-1"></i> @role
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="col-6 col-md-4 text-end">
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm dropdown-toggle border rounded-pill px-3" 
+                                                type="button" @onclick="() => ToggleDropdown(user.Id)">
+                                            Ändra roll
+                                        </button>
+                                        
+                                        <ul class="dropdown-menu shadow-sm border-0 @(openDropdownUserId == user.Id ? "show" : "")" 
+                                            style="position: absolute; right: 0; margin-top: 5px;">
+                                            <li><button class="dropdown-item" @onclick='() => HandleUpdateRole(user.Id, "User")'>User</button></li>
+                                            <li><button class="dropdown-item" @onclick='() => HandleUpdateRole(user.Id, "Admin")'>Admin</button></li>
+                                        </ul>
+                                    </div>
+
+                                    <button class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleDelete(user)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<UserDto>? users;
+    private string? openDropdownUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await UserService.GetAllUsers();
+    }
+
+    private void ToggleDropdown(string userId)
+    {
+        if (openDropdownUserId == userId) openDropdownUserId = null;
+        else openDropdownUserId = userId;
+    }
+
+    private async Task HandleUpdateRole(string userId, string role)
+    {
+        openDropdownUserId = null;
+        bool success = await UserService.UpdateUserRole(new UpdateRoleDto { UserId = userId, NewRole = role });
+        if (success) users = await UserService.GetAllUsers();
+    }
+
+    private async Task HandleDelete(UserDto user)
+    {
+        if (await UserService.DeleteUser(user.Id))
+        {
+            users?.Remove(user);
+        }
+    }
+}
