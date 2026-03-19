@@ -102,9 +102,23 @@ public class AuthRepository(
   }
 
   // ADMIN FUNCTIONS //
-  public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
+  public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
   {
-    return await userManager.Users.ToListAsync();
+    var users = await userManager.Users.ToListAsync();
+    var userDtos = new List<UserDto>();
+
+    foreach (var user in users)
+    {
+      userDtos.Add(new UserDto
+      {
+        Id = user.Id,
+        Email = user.Email,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
+        Roles = await userManager.GetRolesAsync(user)
+      });
+    }
+    return userDtos;
   }
 
   public async Task<IdentityResult> UpdateUserRoleAsync(string userId, string newRole)
