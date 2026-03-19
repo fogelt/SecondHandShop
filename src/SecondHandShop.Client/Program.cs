@@ -1,5 +1,5 @@
 using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using SecondHandShop.Client.Auth;
 using SecondHandShop.Client.Components;
@@ -7,19 +7,38 @@ using SecondHandShop.Client.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Add Razor Components with Interactive Server Mode
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 builder.Services.AddBlazoredLocalStorage();
+
+// 2. Configure Authentication with a Default Scheme
+// This prevents the "No DefaultChallengeScheme found" error.
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddCookie(options =>
+    {
+        // Where to send the user if they try to access [Authorize] pages without being logged in
+        options.LoginPath = "/login";
+    });
+
+// 3. Authorization and State Management
+builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication();
+
+// 4. Custom Auth Provider Setup
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<CustomAuthStateProvider>());
 
 builder.Services.AddScoped<AuthService>();
 
+// 5. HttpClient Configuration
 builder.Services.AddScoped(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -33,15 +52,23 @@ builder.Services.AddScoped(sp =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 6. Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+
+// 7. IMPORTANT: Middleware Order
+// Authentication MUST come before Authorization
+app.UseStaticFiles();
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseAntiforgery();
 

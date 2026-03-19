@@ -39,7 +39,8 @@ public static class IdentityServiceExtensions
       options.TokenValidationParameters = new TokenValidationParameters
       {
         ValidateIssuerSigningKey = true,
-        RoleClaimType = "role",
+        RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+        NameClaimType = System.Security.Claims.ClaimTypes.Name,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!)),
         ValidateIssuer = true,
         ValidIssuer = config["Jwt:Issuer"],

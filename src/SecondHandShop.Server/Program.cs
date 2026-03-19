@@ -5,6 +5,7 @@ using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Server.Services;
 using SecondHandShop.Server.Repositories;
 
+System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
