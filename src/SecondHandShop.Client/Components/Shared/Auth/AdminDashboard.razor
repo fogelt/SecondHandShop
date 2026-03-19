@@ -6,25 +6,42 @@
   @if (User != null)
   {
     <div class="text-center mb-5">
-      <h1 class="display-6 fw-bold text-uppercase tracking-widest">
-        Kontrollpanel
+      <h1 class="display-6 fw-bold text-uppercase" style="letter-spacing: 3px;">
+        Admin panel
       </h1>
     </div>
 
-    <div class="mx-auto" style="max-width: 600px;">
+    <div class="mx-auto mb-5" style="max-width: 600px;">
       <div class="row g-2">
         <AdminDashboardCard Title="Användare" Description="Hantera konton och roller." Icon="bi-person-gear"
-                            Url="admin-users" />
+                            IsActive="@(currentTab == "users")" OnClick="@(() => SetTab("users"))" />
 
         <AdminDashboardCard Title="Produkter" Description="Hantera sortiment och priser." Icon="bi-archive"
-                            Url="admin-products" />
+                            IsActive="@(currentTab == "products")" OnClick="@(() => SetTab("products"))" />
 
         <AdminDashboardCard Title="Ordrar" Description="Översikt av transaktioner." Icon="bi-box-seam"
-                            Url="admin-orders" />
+                            IsActive="@(currentTab == "orders")" OnClick="@(() => SetTab("orders"))" />
       </div>
     </div>
 
-    <div class="mt-5 text-center">
+    <div class="tab-content-area mx-auto" style="max-width: 900px;">
+      @if (currentTab == "users")
+      {
+        <div class="p-5 text-center bg-light rounded-4">
+          <UserManagement />
+        </div>
+      }
+      else if (currentTab == "products")
+      {
+        <div class="p-5 text-center bg-light rounded-4">Produkthantering kommer snart...</div>
+      }
+      else if (currentTab == "orders")
+      {
+        <div class="p-5 text-center bg-light rounded-4">Orderöversikt kommer snart...</div>
+      }
+    </div>
+
+    <div class="mt-5 text-center pt-5">
       <div class="mb-3">
         @foreach (var claim in User.Claims.Where(c => c.Type == "role"))
         {
@@ -33,7 +50,6 @@
           </span>
         }
       </div>
-
       <button class="btn btn-dark px-5" @onclick="HandleLogout">
         <i class="bi bi-box-arrow-right me-2"></i>Logga ut
       </button>
@@ -44,6 +60,7 @@
 @code {
   [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
   private ClaimsPrincipal? User;
+  private string currentTab = "";
 
   protected override async Task OnInitializedAsync()
   {
@@ -51,11 +68,10 @@
     User = authState.User;
   }
 
+  private void SetTab(string tab)
+  {
+    currentTab = (currentTab == tab) ? "" : tab;
+  }
+
   private async Task HandleLogout() => await AuthService.Logout();
 }
-
-<style>
-  .tracking-widest {
-    letter-spacing: 3px;
-  }
-</style>
