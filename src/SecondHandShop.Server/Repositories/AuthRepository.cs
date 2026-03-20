@@ -101,7 +101,7 @@ public class AuthRepository(
     );
   }
 
-  // ADMIN FUNCTIONS //
+  // USER FUNCTIONS //
   public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
   {
     var users = await userManager.Users.ToListAsync();
@@ -135,12 +135,14 @@ public class AuthRepository(
     return await userManager.AddToRoleAsync(user, newRole);
   }
 
-  public async Task<IdentityResult> UpdateUserAsync(string id, UpdateUserDto model)
+  public async Task<(IdentityResult Result, AuthResponseDto? Response)> UpdateUserAsync(string id, UpdateUserDto model)
   {
     var user = await userManager.FindByIdAsync(id);
-    if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+    if (user == null)
+      return (IdentityResult.Failed(new IdentityError { Description = "User not found" }), null);
 
     user.FirstName = model.FirstName;
+    user.LastName = model.LastName;
     user.Email = model.Email;
     user.UserName = model.Email;
 
@@ -152,6 +154,12 @@ public class AuthRepository(
       result = await userManager.ResetPasswordAsync(user, token, model.NewPassword);
     }
 
-    return result;
+    if (result.Succeeded)
+    {
+      var authResponse = await CreateAuthResponse(user);
+      return (result, authResponse);
+    }
+
+    return (result, null);
   }
 }

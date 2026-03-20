@@ -65,19 +65,15 @@ public class AuthController(IAuthRepository authRepo) : ControllerBase
   [Authorize]
   public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto model)
   {
-    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    if (currentUserId != id)
-    {
-      return Forbid("Du har inte behörighet att uppdatera detta konto.");
-    }
-    if (!ModelState.IsValid)
-      return BadRequest(ModelState);
-    var result = await authRepo.UpdateUserAsync(id, model);
+    if (User.FindFirstValue(ClaimTypes.NameIdentifier) != id)
+      return Forbid();
+
+    var (result, authResponse) = await authRepo.UpdateUserAsync(id, model);
+
     if (!result.Succeeded)
-    {
       return BadRequest(result.Errors);
-    }
-    return Ok(new { Message = "Profilen har uppdaterats!" });
+
+    return Ok(authResponse);
   }
 
   [HttpGet("get-all")]
