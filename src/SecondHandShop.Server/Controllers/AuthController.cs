@@ -61,6 +61,25 @@ public class AuthController(IAuthRepository authRepo) : ControllerBase
     return Ok(new { message = $"Användarens roll har uppdaterats till {dto.NewRole}" });
   }
 
+  [HttpPut("update-user/{id}")]
+  [Authorize]
+  public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto model)
+  {
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (currentUserId != id)
+    {
+      return Forbid("Du har inte behörighet att uppdatera detta konto.");
+    }
+    if (!ModelState.IsValid)
+      return BadRequest(ModelState);
+    var result = await authRepo.UpdateUserAsync(id, model);
+    if (!result.Succeeded)
+    {
+      return BadRequest(result.Errors);
+    }
+    return Ok(new { Message = "Profilen har uppdaterats!" });
+  }
+
   [HttpGet("get-all")]
   [Authorize(Roles = "Admin")]
   public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()

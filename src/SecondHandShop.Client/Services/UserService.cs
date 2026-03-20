@@ -19,6 +19,20 @@ public class UserService(HttpClient http, AuthUtility authUtil)
     return response.IsSuccessStatusCode;
   }
 
+  public async Task<string?> UpdateUserAsync(UpdateUserDto dto)
+  {
+    await authUtil.EnsureHeader();
+    var response = await http.PutAsJsonAsync($"api/auth/update-user/{dto.Id}", dto);
+
+    if (!response.IsSuccessStatusCode)
+    {
+      var rawContent = await response.Content.ReadAsStringAsync();
+      return authUtil.ParseIdentityErrors(rawContent);
+    }
+
+    return null;
+  }
+
   public async Task<bool> DeleteUser(string userId)
   {
     await authUtil.EnsureHeader();

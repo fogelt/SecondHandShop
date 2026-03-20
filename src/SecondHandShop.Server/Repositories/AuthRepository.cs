@@ -134,4 +134,24 @@ public class AuthRepository(
 
     return await userManager.AddToRoleAsync(user, newRole);
   }
+
+  public async Task<IdentityResult> UpdateUserAsync(string id, UpdateUserDto model)
+  {
+    var user = await userManager.FindByIdAsync(id);
+    if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+    user.FirstName = model.FirstName;
+    user.Email = model.Email;
+    user.UserName = model.Email;
+
+    var result = await userManager.UpdateAsync(user);
+
+    if (result.Succeeded && !string.IsNullOrWhiteSpace(model.NewPassword))
+    {
+      var token = await userManager.GeneratePasswordResetTokenAsync(user);
+      result = await userManager.ResetPasswordAsync(user, token, model.NewPassword);
+    }
+
+    return result;
+  }
 }
