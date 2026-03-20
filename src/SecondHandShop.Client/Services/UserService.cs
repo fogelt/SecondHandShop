@@ -15,7 +15,7 @@ public class UserService(HttpClient http, AuthUtility authUtil)
   public async Task<bool> UpdateUserRole(UpdateRoleDto dto)
   {
     await authUtil.EnsureHeader();
-    var response = await http.PostAsJsonAsync("api/auth/update-role", dto);
+    var response = await http.PutAsJsonAsync("api/auth/update-role", dto);
     return response.IsSuccessStatusCode;
   }
 

@@ -49,7 +49,7 @@ public class AuthController(IAuthRepository authRepo) : ControllerBase
     return NoContent();
   }
 
-  [HttpPost("update-role")]
+  [HttpPut("update-role")]
   [Authorize(Roles = "Admin")]
   public async Task<IActionResult> UpdateRole([FromBody] UpdateRoleDto dto)
   {
