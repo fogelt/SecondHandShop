@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Identity
 @inject AuthService AuthService
 
 @if (showLogin)
@@ -15,10 +16,14 @@
           <InputText type="email" class="form-control form-control-lg" @bind-Value="loginModel.Email" />
           <ValidationMessage For="@(() => loginModel.Email)" class="text-danger small" />
         </div>
-        <div class="mb-4">
-          <label class="form-label">Lösenord</label>
-          <InputText type="password" class="form-control form-control-lg" @bind-Value="loginModel.Password" />
-          <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small" />
+        <label class="form-label">Lösenord</label>
+        <div class="input-group mb-3 border rounded">
+          <InputText type="@_passwordFieldType" class="form-control form-control-lg border-0"
+                     @bind-Value="loginModel.Password" />
+
+          <button class="btn bg-transparent border-0" type="button" @onclick="TogglePasswordVisibility">
+            <i class="@_iconClass text-muted"></i>
+          </button>
         </div>
 
         <button type="submit" class="btn btn-dark btn-lg w-100">
@@ -92,6 +97,11 @@ else
 }
 
 @code {
+  private bool _showPassword = false;
+  private string _passwordFieldType => _showPassword ? "text" : "password";
+  private string _iconClass => _showPassword ? "bi bi-eye-slash" : "bi bi-eye";
+
+  private void TogglePasswordVisibility() => _showPassword = !_showPassword;
   private LoginRequestDto loginModel = new LoginRequestDto();
   private RegisterRequestDto registerModel = new RegisterRequestDto();
   private string? errorMessage;
@@ -124,3 +134,18 @@ else
     }
   }
 }
+
+<style>
+  .input-group:focus-within {
+    box-shadow: 0 0 0 1px rgb(0, 0, 0) !important;
+    outline: 0;
+  }
+
+  .input-group .form-control:focus {
+    box-shadow: none !important;
+  }
+
+  .input-group .btn:focus {
+    box-shadow: none !important;
+  }
+</style>
