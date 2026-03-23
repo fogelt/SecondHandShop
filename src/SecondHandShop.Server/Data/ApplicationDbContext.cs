@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SecondHandShop.Shared.Models;
 using SecondHandShop.Server.Models;
@@ -11,6 +11,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
       : base(options) { }
 
   public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+  public DbSet<Product> Products => Set<Product>();
 
   protected override void OnModelCreating(ModelBuilder builder)
   {

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SecondHandShop.Server.Extensions;
 using SecondHandShop.Server.Data;
 using SecondHandShop.Server.Interfaces;
@@ -17,6 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 
 var app = builder.Build();
 
@@ -27,7 +28,7 @@ if (app.Environment.IsDevelopment())
     await db.Database.MigrateAsync();
 
     // Våran seeder från DbSeeder
-    await DbSeeder.SeedIdentityAsync(app.Services);
+    await DbSeeder.SeedDataAsync(app.Services);
 
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -36,4 +37,5 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();
