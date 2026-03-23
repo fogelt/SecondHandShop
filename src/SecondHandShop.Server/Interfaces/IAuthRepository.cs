@@ -7,6 +7,7 @@ namespace SecondHandShop.Server.Interfaces;
 public interface IAuthRepository
 {
   Task<IEnumerable<UserDto>> GetAllUsersAsync();
+  Task<(IdentityResult Result, AuthResponseDto? Response)> UpdateUserAsync(string id, UpdateUserDto model);
   Task<IdentityResult> UpdateUserRoleAsync(string userId, string newRole);
   Task<IdentityResult> DeleteUserAsync(string id);
   Task<IdentityResult> RegisterAsync(RegisterRequestDto dto);
