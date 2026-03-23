@@ -11,6 +11,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
       : base(options) { }
 
   public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+  public DbSet<Product> Products => Set<Product>();
 
   protected override void OnModelCreating(ModelBuilder builder)
   {
@@ -22,6 +23,4 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         .HasForeignKey(rt => rt.UserId)
         .OnDelete(DeleteBehavior.Cascade);
   }
-
-public DbSet<SecondHandShop.Server.Models.Product> Product { get; set; } = default!;
 }

@@ -12,18 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddQuickGridEntityFrameworkAdapter();
-
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 
 var app = builder.Build();
 
@@ -34,7 +28,7 @@ if (app.Environment.IsDevelopment())
     await db.Database.MigrateAsync();
 
     // Våran seeder från DbSeeder
-    await DbSeeder.SeedIdentityAsync(app.Services);
+    await DbSeeder.SeedDataAsync(app.Services);
 
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -44,5 +38,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapRazorComponents<App>();
 app.Run();
