@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SecondHandShop.Shared.Models;
 using SecondHandShop.Server.Models;
@@ -22,4 +22,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         .HasForeignKey(rt => rt.UserId)
         .OnDelete(DeleteBehavior.Cascade);
   }
+
+public DbSet<SecondHandShop.Server.Models.Product> Product { get; set; } = default!;
 }
