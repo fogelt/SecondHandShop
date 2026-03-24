@@ -4,13 +4,16 @@
 @inject NavigationManager Nav
 
 <div class="container mt-5">
+    <a href="/" class="text-decoration-none text-muted small fw-medium">
+        <i class="bi bi-chevron-left"></i> Tillbaka till butiken
+    </a>
     @if (product == null)
     {
         <p>Laddar produkt...</p>
     }
     else
     {
-        <div class="row">
+        <div class="row mt-2">
             <div class="col-md-6">
                 @if (!string.IsNullOrEmpty(product.ImageUrl))
                 {
@@ -34,8 +37,7 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary btn-lg w-100 mb-2">Lägg i kundvagn</button>
-                <button class="btn btn-outline-secondary w-100" @onclick="GoBack">Tillbaka</button>
+                <button class="btn btn-dark btn-lg w-100 mb-2">Lägg i kundvagn</button>
             </div>
         </div>
     }
@@ -57,10 +59,5 @@
         {
             Console.WriteLine($"Fel vid hämtning av produkt: {ex.Message}");
         }
-    }
-
-    private void GoBack()
-    {
-        Nav.NavigateTo("/");
     }
 }
