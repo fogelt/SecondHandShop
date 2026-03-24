@@ -1,7 +1,10 @@
 ﻿@page "/products/{id:int}"
 @using SecondHandShop.Shared.DTOs
+@using SecondHandShop.Client.Services
 @inject HttpClient Http
 @inject NavigationManager Nav
+@inject ProductService ProductService
+@inject CartService CartService
 
 <div class="container mt-5">
     <a href="/" class="text-decoration-none text-muted small fw-medium">
@@ -37,7 +40,12 @@
                     </div>
                 </div>
 
-                <button class="btn btn-dark btn-lg w-100 mb-2">Lägg i kundvagn</button>
+                <button class="btn btn-dark btn-lg w-100 mb-2" @onclick="AddToCart">Lägg i kundvagn</button>
+
+                @if (!string.IsNullOrEmpty(message))
+                {
+                    <p class="small mt-2 @messageClass">@message</p>
+                }
             </div>
         </div>
     }
@@ -48,16 +56,30 @@
     public int Id { get; set; }
 
     private ProductDto? product;
+    private string? message;
+    private string messageClass = "";
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        product = await ProductService.GetProductByIdAsync(Id);
+    }
+
+    private async Task AddToCart()
+    {
+        if (product != null)
         {
-            product = await Http.GetFromJsonAsync<ProductDto>($"api/products/{Id}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Fel vid hämtning av produkt: {ex.Message}");
+            bool success = await CartService.AddToCartAsync(product.Id);
+
+            if (success)
+            {
+                message = "Tillagd i kundvagnen!";
+                messageClass = "text-success";
+            }
+            else
+            {
+                message = "Kunde inte lägga till varan. Kontrollera inloggning.";
+                messageClass = "text-danger";
+            }
         }
     }
 }

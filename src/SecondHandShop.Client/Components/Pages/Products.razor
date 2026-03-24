@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using SecondHandShop.Shared.DTOs
+@inject ProductService ProductService
 @inject HttpClient Http
 
 <div class="container mt-5 card p-5">
@@ -37,13 +38,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            products = await Http.GetFromJsonAsync<List<ProductDto>>("api/products");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Fel vid hämtning: {ex.Message}");
-        }
+        products = await ProductService.GetAllProductsAsync();
     }
 }

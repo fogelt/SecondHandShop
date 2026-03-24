@@ -22,6 +22,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthUtility>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<ProductService>();
 
 builder.Services.AddHttpClient("ServerApi", (sp, client) =>
 {
