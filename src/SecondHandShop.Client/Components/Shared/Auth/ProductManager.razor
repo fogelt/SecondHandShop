@@ -1,6 +1,7 @@
 @using SecondHandShop.Shared.DTOs
 @using SecondHandShop.Client.Services
 @inject ProductService UserService
+@inject NavigationManager Navigation
 
 <div class="user-management-container">
     @if (products == null)
@@ -29,7 +30,7 @@
                                 <button class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleDelete(user)">
                                     <i class="bi bi-trash"></i>
                                 </button>
-                                <button class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleUpdate(user.Id, user)">
+                            <button class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleUpdateNav(user.Id)">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                             </div>
@@ -63,8 +64,8 @@
         }
     }
 
-    private async Task HandleUpdate(int id, ProductDto user)
+    private async Task HandleUpdateNav(int id)
     {
-        await UserService.UpdateProductAsync(id, user);
+        Navigation.NavigateTo($"/products/{id}");
     }
 }
