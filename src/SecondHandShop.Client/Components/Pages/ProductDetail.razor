@@ -1,0 +1,66 @@
+﻿@page "/products/{id:int}"
+@using SecondHandShop.Shared.DTOs
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="container mt-5">
+    @if (product == null)
+    {
+        <p>Laddar produkt...</p>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-6">
+                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                {
+                    <img src="@product.ImageUrl" class="img-fluid rounded" alt="@product.Name">
+                }
+                else
+                {
+                    <div class="bg-light rounded p-5 text-center">
+                        <p class="text-muted">Ingen bild tillgänglig</p>
+                    </div>
+                }
+            </div>
+            <div class="col-md-6">
+                <h2>@product.Name</h2>
+                <p class="lead text-success">@product.Price.ToString("C")</p>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title">Beskrivning</h6>
+                        <p class="card-text">@product.Description</p>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-lg w-100 mb-2">Lägg i kundvagn</button>
+                <button class="btn btn-outline-secondary w-100" @onclick="GoBack">Tillbaka</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ProductDto? product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            product = await Http.GetFromJsonAsync<ProductDto>($"api/products/{Id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fel vid hämtning av produkt: {ex.Message}");
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/");
+    }
+}
