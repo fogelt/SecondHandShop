@@ -1,5 +1,5 @@
 ﻿@page "/products/{id:int}"
-@using SecondHandShop.Shared.Models
+@using SecondHandShop.Shared.DTOs
 @inject HttpClient Http
 @inject NavigationManager Nav
 
@@ -34,25 +34,6 @@
                     </div>
                 </div>
 
-                @if (product.Seller != null)
-                {
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h6 class="card-title">Säljare</h6>
-                            <p class="mb-1"><strong>@product.Seller.FirstName @product.Seller.LastName</strong></p>
-                            <p class="text-muted mb-0">@product.Seller.Email</p>
-                        </div>
-                    </div>
-                }
-
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <p class="text-muted mb-0">
-                            <small>Publicerad: @product.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
-                        </p>
-                    </div>
-                </div>
-
                 <button class="btn btn-primary btn-lg w-100 mb-2">Lägg i kundvagn</button>
                 <button class="btn btn-outline-secondary w-100" @onclick="GoBack">Tillbaka</button>
             </div>
@@ -64,13 +45,13 @@
     [Parameter]
     public int Id { get; set; }
 
-    private Product? product;
+    private ProductDto? product;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            product = await Http.GetFromJsonAsync<Product>($"api/products/{Id}");
+            product = await Http.GetFromJsonAsync<ProductDto>($"api/products/{Id}");
         }
         catch (Exception ex)
         {

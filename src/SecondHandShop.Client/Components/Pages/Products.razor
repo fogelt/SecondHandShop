@@ -1,0 +1,54 @@
+﻿@page "/products"
+@using SecondHandShop.Shared.DTOs
+@inject HttpClient Http
+
+<div class="container mt-5">
+    <h2>Produkter</h2>
+
+    @if (products == null)
+    {
+        <p>Laddar produkter...</p>
+    }
+    else if (products.Count == 0)
+    {
+        <p>Inga produkter tillgängliga.</p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var product in products)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name">
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text">@product.Description</p>
+                            <p><strong>Pris:</strong> @product.Price.ToString("C")</p>
+                            <a href="/products/@product.Id" class="btn btn-primary">Visa detaljer</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<ProductDto>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            products = await Http.GetFromJsonAsync<List<ProductDto>>("api/products");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fel vid hämtning av produkter: {ex.Message}");
+        }
+    }
+}
