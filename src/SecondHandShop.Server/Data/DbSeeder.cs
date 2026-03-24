@@ -40,20 +40,20 @@ public static class DbSeeder
     var products = new List<Product>
         {
             new() {
-                Name = "Vintage Camera",
-                Description = "A well-preserved film camera from the 70s.",
+                Name = "Vintagekamera",
+                Description = "En vackert bevarad analog filmkamera från 70-talet. Perfekt för både samlare och entusiaster som vill utforska charmen med klassiskt fotografi.",
                 Price = 1200.00m,
                 ImageUrl = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32"
             },
             new() {
-                Name = "Leather Jacket",
-                Description = "Classic black leather jacket, size Large. Minor wear.",
+                Name = "Skinnjacka",
+                Description = "Klassisk svart skinnjacka i storlek Large. Gjord i högkvalitativt läder med en tidlös passform. Har ett lätt naturligt slitage som bara ger den mer karaktär.",
                 Price = 850.50m,
                 ImageUrl = "https://images.unsplash.com/photo-1551028719-00167b16eac5"
             },
             new() {
-                Name = "Mechanical Keyboard",
-                Description = "RGB backlit with blue switches. Great for typing.",
+                Name = "Mekaniskt Tangentbord",
+                Description = "Ett robust tangentbord med RGB-bakgrundsbelysning och klickiga blå brytare. Ger en fantastisk skrivkänsla och är i nyskick.",
                 Price = 450.00m,
                 ImageUrl = "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae"
             }
