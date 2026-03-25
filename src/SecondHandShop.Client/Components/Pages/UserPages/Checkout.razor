@@ -157,16 +157,15 @@
       }).ToList()
     };
 
-    OrderDto? result = await OrderService.CreateOrderAsync(orderDto);
+    string? checkoutUrl = await OrderService.GetStripeCheckoutUrl(orderDto);
 
-    if (result != null)
+    if (!string.IsNullOrEmpty(checkoutUrl))
     {
-      CartService.CartItems.Clear();
-      Nav.NavigateTo($"/order-success/{result.Id}");
+      Nav.NavigateTo(checkoutUrl, forceLoad: true);
     }
     else
     {
-      errorMessage = "Kunde inte slutföra beställningen. Försök igen.";
+      errorMessage = "Kunde inte initiera betalning.";
       isProcessing = false;
     }
   }

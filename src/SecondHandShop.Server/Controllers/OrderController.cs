@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Server.Models;
 using SecondHandShop.Shared.DTOs;
+using SecondHandShop.Shared.Enums;
 using System.Security.Claims;
 
 namespace SecondHandShop.Server.Controllers;
@@ -10,31 +11,47 @@ namespace SecondHandShop.Server.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class OrderController(IOrderRepository orderRepo) : ControllerBase
+public class OrderController(IOrderRepository orderRepo, IConfiguration config) : ControllerBase
 {
-  [HttpPost("create")]
-  public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
+  [HttpGet("confirm-payment/{sessionId}")]
+  public async Task<IActionResult> ConfirmPayment(string sessionId)
   {
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+    Stripe.StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
+    var service = new Stripe.Checkout.SessionService();
+    var session = await service.GetAsync(sessionId);
 
-    var order = new Order
+    if (session != null && session.PaymentStatus == "paid")
     {
-      UserId = userId,
-      OrderDate = DateTime.Now,
-      TotalPrice = dto.TotalPrice,
-      ShippingStreet = dto.ShippingStreet,
-      ShippingCity = dto.ShippingCity,
-      ShippingZipCode = dto.ShippingZipCode,
-      OrderItems = dto.OrderItems.Select(oi => new OrderItem
-      {
-        ProductId = oi.ProductId,
-        Quantity = oi.Quantity,
-        PriceAtPurchase = oi.UnitPrice
-      }).ToList()
-    };
+      var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+      var jsonData = session.Metadata["OrderData"];
+      var dto = System.Text.Json.JsonSerializer.Deserialize<OrderDto>(jsonData);
 
-    var result = await orderRepo.CreateOrderAsync(order);
-    return Ok(result);
+      if (dto != null)
+      {
+        var order = new Order
+        {
+          UserId = userId!,
+          OrderDate = DateTime.Now,
+          TotalPrice = dto.TotalPrice,
+          ShippingStreet = dto.ShippingStreet,
+          ShippingCity = dto.ShippingCity,
+          ShippingZipCode = dto.ShippingZipCode,
+          OrderStatus = OrderStatus.Mottagen,
+          PaymentStatus = PaymentStatus.Betald,
+          OrderItems = dto.OrderItems.Select(oi => new OrderItem
+          {
+            ProductId = oi.ProductId,
+            Quantity = oi.Quantity,
+            PriceAtPurchase = oi.UnitPrice
+          }).ToList()
+        };
+
+        var result = await orderRepo.CreateOrderAsync(order);
+        return Ok(result);
+      }
+    }
+
+    return BadRequest("Betalning kunde inte verifieras.");
   }
 
   [HttpGet("my-orders")]
