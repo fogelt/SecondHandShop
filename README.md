@@ -3,7 +3,7 @@
 Öppna en terminal och kör:
 ```bash
 Kör backend
-dotnet run --project src/SecondHandStore.Server
+dotnet run --project src/SecondHandShop.Server
 
 Kör frontend
-dotnet run --project src/SecondHandStore.Client
+dotnet run --project src/SecondHandShop.Client
