@@ -117,14 +117,28 @@ public class AuthUtility(HttpClient http, ILocalStorageService localStorage)
     try
     {
       using var doc = JsonDocument.Parse(rawContent);
-      if (doc.RootElement.ValueKind == JsonValueKind.Array)
+      var root = doc.RootElement;
+      if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("errors", out var errorsElement))
       {
-        return string.Join(" ", doc.RootElement.EnumerateArray()
+        var messages = new List<string>();
+        foreach (var property in errorsElement.EnumerateObject())
+        {
+          foreach (var error in property.Value.EnumerateArray())
+          {
+            messages.Add(error.GetString() ?? "");
+          }
+        }
+        return string.Join(", ", messages.Where(m => !string.IsNullOrEmpty(m)));
+      }
+      if (root.ValueKind == JsonValueKind.Array)
+      {
+        return string.Join(", ", root.EnumerateArray()
             .Select(e => e.GetProperty("description").GetString())
             .Where(d => !string.IsNullOrEmpty(d)));
       }
     }
     catch { }
+
     return rawContent;
   }
 }

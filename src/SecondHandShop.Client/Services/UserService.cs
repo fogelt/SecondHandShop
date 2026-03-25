@@ -50,4 +50,16 @@ public class UserService(HttpClient http, AuthUtility authUtil, ILocalStorageSer
     var response = await http.DeleteAsync($"api/auth/delete/{userId}");
     return response.IsSuccessStatusCode;
   }
+
+  public async Task<UpdateUserDto?> GetUserSettingsAsync(string userId)
+  {
+    await authUtil.EnsureHeader();
+    var response = await http.GetAsync($"api/auth/user-settings/{userId}");
+
+    if (response.IsSuccessStatusCode)
+    {
+      return await response.Content.ReadFromJsonAsync<UpdateUserDto>();
+    }
+    return null;
+  }
 }

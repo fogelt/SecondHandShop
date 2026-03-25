@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SecondHandShop.Shared.DTOs;
-using SecondHandShop.Shared.Models;
+using SecondHandShop.Server.Models;
 
 namespace SecondHandShop.Server.Interfaces;
 
@@ -15,4 +15,5 @@ public interface IAuthRepository
   Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken);
   Task<bool> LogoutAsync(string refreshToken, string userId);
   Task<ApplicationUser?> GetUserByEmailAsync(string email);
+  Task<UpdateUserDto?> GetUserForUpdateAsync(string id);
 }

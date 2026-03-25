@@ -1,0 +1,173 @@
+@page "/checkout"
+@using SecondHandShop.Client.Services
+@using SecondHandShop.Shared.DTOs
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject CartService CartService
+@inject OrderService OrderService
+@inject UserService UserService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<AuthorizeView>
+  <Authorized>
+    <div class="container py-5">
+      <div class="row g-5">
+        <div class="col-md-7">
+          <h4 class="mb-4 fw-bold">1. Leveransadress</h4>
+          @if (isLoadingUser)
+          {
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+          }
+          else if (userProfile?.Address == null)
+          {
+            <div class="alert alert-warning rounded-4 shadow-sm">
+              <h5 class="fw-bold">Adress saknas</h5>
+              <p>Vi behöver din adress för att slutföra köpet.</p>
+              <button class="btn btn-dark btn-sm" @onclick='() => Nav.NavigateTo("/profile")'>
+                Gå till profil
+              </button>
+            </div>
+          }
+          else
+          {
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-light">
+              <p class="mb-1 fw-bold">@userProfile.FirstName @userProfile.LastName</p>
+              <p class="mb-1 text-muted">@userProfile.Address.Street</p>
+              <p class="mb-0 text-muted">@userProfile.Address.ZipCode, @userProfile.Address.City</p>
+            </div>
+          }
+
+          <h4 class="mb-4 fw-bold">2. Granska artiklar</h4>
+          <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <ul class="list-group list-group-flush">
+              @foreach (var item in CartService.CartItems)
+              {
+                <li class="list-group-item py-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      @if (!string.IsNullOrEmpty(item.ImageUrl))
+                      {
+                        <img src="@item.ImageUrl" class="rounded me-3"
+                             style="width: 50px; height: 50px; object-fit: cover;" />
+                      }
+                      <div>
+                        <h6 class="mb-0 fw-bold">@item.ProductName</h6>
+                        <small class="text-muted">Antal: @item.Quantity</small>
+                      </div>
+                    </div>
+                    <span class="fw-bold">@item.Total.ToString("C")</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-5">
+          <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 20px;">
+            <h4 class="fw-bold mb-4">Sammanfattning</h4>
+                        
+            <div class="d-flex justify-content-between mb-2">
+              <span>Delsumma</span>
+              <span>@CartService.GetTotal().ToString("C")</span>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+              <span class="">Frakt</span>
+              <span class="">0 kr</span>
+            </div>
+
+            <hr class="border-secondary">
+
+            <div class="d-flex justify-content-between fs-4 fw-bold mb-5">
+              <span>Totalt</span>
+              <span>@CartService.GetTotal().ToString("C")</span>
+            </div>
+
+            <button class="btn btn-dark btn-lg w-100 py-3 fw-bold mb-3" @onclick="HandlePayment"
+                    disabled="@(isProcessing || userProfile?.Address == null || !CartService.CartItems.Any())">
+              @if (isProcessing)
+              {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                <span>Bearbetar...</span>
+              }
+              else
+              {
+                <span>Betala köp</span>
+              }
+            </button>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+              <div class="alert alert-danger py-2 small">@errorMessage</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </Authorized>
+</AuthorizeView>
+
+@code {
+  private UpdateUserDto? userProfile;
+  private bool isLoadingUser = true;
+  private bool isProcessing = false;
+  private string? errorMessage;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity?.IsAuthenticated == true)
+    {
+      var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? user.FindFirst("nameid")?.Value;
+
+      if (userId != null)
+      {
+        userProfile = await UserService.GetUserSettingsAsync(userId);
+      }
+    }
+
+    await CartService.GetCartAsync();
+    isLoadingUser = false;
+  }
+
+  private async Task HandlePayment()
+  {
+    if (userProfile?.Address == null || !CartService.CartItems.Any()) return;
+        
+    isProcessing = true;
+    errorMessage = null;
+
+    var orderDto = new OrderDto
+    {
+      TotalPrice = CartService.GetTotal(),
+      ShippingStreet = userProfile.Address.Street,
+      ShippingCity = userProfile.Address.City,
+      ShippingZipCode = userProfile.Address.ZipCode,
+      OrderItems = CartService.CartItems.Select(item => new OrderItemDto
+      {
+        ProductId = item.ProductId,
+        ProductName = item.ProductName,
+        ProductImageUrl = item.ImageUrl,
+        Quantity = item.Quantity,
+        UnitPrice = item.Price
+      }).ToList()
+    };
+
+    OrderDto? result = await OrderService.CreateOrderAsync(orderDto);
+
+    if (result != null)
+    {
+      CartService.CartItems.Clear();
+      Nav.NavigateTo($"/order-success/{result.Id}");
+    }
+    else
+    {
+      errorMessage = "Kunde inte slutföra beställningen. Försök igen.";
+      isProcessing = false;
+    }
+  }
+}

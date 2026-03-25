@@ -1,5 +1,3 @@
-using SecondHandShop.Shared.Models;
-
 namespace SecondHandShop.Server.Models;
 
 public class RefreshToken

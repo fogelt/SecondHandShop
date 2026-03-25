@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using SecondHandShop.Shared.Models;
+using SecondHandShop.Server.Models;
 using SecondHandShop.Server.Data;
 using System.IdentityModel.Tokens.Jwt;
 
