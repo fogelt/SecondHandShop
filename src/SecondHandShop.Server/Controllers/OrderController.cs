@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Server.Models;
+using SecondHandShop.Shared.DTOs;
 using System.Security.Claims;
 
 namespace SecondHandShop.Server.Controllers;
@@ -12,13 +13,28 @@ namespace SecondHandShop.Server.Controllers;
 public class OrderController(IOrderRepository orderRepo) : ControllerBase
 {
   [HttpPost("create")]
-  public async Task<IActionResult> CreateOrder([FromBody] Order order)
+  public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
   {
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    if (userId == null) return Unauthorized();
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
-    order.UserId = userId;
-    return Ok(await orderRepo.CreateOrderAsync(order));
+    var order = new Order
+    {
+      UserId = userId,
+      OrderDate = DateTime.Now,
+      TotalPrice = dto.TotalPrice,
+      ShippingStreet = dto.ShippingStreet,
+      ShippingCity = dto.ShippingCity,
+      ShippingZipCode = dto.ShippingZipCode,
+      OrderItems = dto.OrderItems.Select(oi => new OrderItem
+      {
+        ProductId = oi.ProductId,
+        Quantity = oi.Quantity,
+        PriceAtPurchase = oi.UnitPrice
+      }).ToList()
+    };
+
+    var result = await orderRepo.CreateOrderAsync(order);
+    return Ok(result);
   }
 
   [HttpGet("my-orders")]
