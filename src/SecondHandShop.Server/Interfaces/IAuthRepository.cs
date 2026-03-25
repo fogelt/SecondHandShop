@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using SecondHandShop.Shared.DTOs;
-using SecondHandShop.Shared.Models;
+using SecondHandShop.Server.Models;
 
 namespace SecondHandShop.Server.Interfaces;
 

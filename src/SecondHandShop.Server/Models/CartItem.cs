@@ -1,4 +1,3 @@
-using SecondHandShop.Shared.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SecondHandShop.Server.Models;

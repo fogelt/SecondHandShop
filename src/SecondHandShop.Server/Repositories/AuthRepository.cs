@@ -4,7 +4,6 @@ using SecondHandShop.Server.Data;
 using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Server.Models;
 using SecondHandShop.Shared.DTOs;
-using SecondHandShop.Shared.Models;
 
 namespace SecondHandShop.Server.Repositories;
 
