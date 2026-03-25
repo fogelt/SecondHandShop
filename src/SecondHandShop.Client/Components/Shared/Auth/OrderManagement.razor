@@ -1,0 +1,130 @@
+@using SecondHandShop.Shared.DTOs
+@using SecondHandShop.Client.Services
+@inject OrderService OrderService
+
+<div class="order-management-container">
+  @if (orders == null)
+  {
+    <div class="text-center py-5">
+      <div class="spinner-border text-dark"></div>
+    </div>
+  }
+  else if (!orders.Any())
+  {
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1"></i>
+      <p>Inga ordrar hittades i systemet.</p>
+    </div>
+  }
+  else
+  {
+    <div class="order-list">
+      @foreach (var order in orders)
+      {
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body p-3">
+            <div class="row align-items-center g-3">
+              <div class="col-12 col-md-4">
+                <div class="d-flex align-items-center">
+                  <div class="bg-light rounded-circle p-3 me-3 text-dark border">
+                    <i class="bi bi-hash"></i>@order.Id
+                  </div>
+                  <div class="text-truncate">
+                    <h6 class="fw-bold mb-0">@order.CustomerName</h6>
+                    <small class="text-muted">@order.CustomerEmail</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6 col-md-3">
+                <div class="small">
+                  <div class="text-muted">Datum: @order.OrderDate.ToShortDateString()</div>
+                  <div class="fw-bold">@order.TotalPrice.ToString("C")</div>
+                </div>
+              </div>
+
+              <div class="col-6 col-md-2">
+                <span class="badge rounded-pill @GetStatusClass(order.OrderStatus) px-3 py-2">
+                  @order.OrderStatus
+                </span>
+              </div>
+
+              <div class="col-12 col-md-3 text-end">
+                <div class="d-flex align-items-center justify-content-end gap-2">
+                  <div class="dropdown">
+                    <button class="btn btn-light btn-sm dropdown-toggle border rounded-pill px-3" type="button"
+                            @onclick="() => ToggleDropdown(order.Id)">
+                      Hantera
+                    </button>
+                                        
+                    <ul class="dropdown-menu shadow-sm border-0 @(openDropdownOrderId == order.Id ? "show" : "")"
+                        style="position: absolute; right: 0; margin-top: 5px; z-index: 1000;">
+                      <li>
+                        <h6 class="dropdown-header">Sätt status</h6>
+                      </li>
+                      <li><button class="dropdown-item"
+                                    @onclick='() => HandleUpdateStatus(order.Id, "Mottagen")'>Mottagen</button></li>
+                        <li><button class="dropdown-item"
+                                      @onclick='() => HandleUpdateStatus(order.Id, "Behandlas")'>Behandlas</button></li>
+                          <li><button class="dropdown-item"
+                                        @onclick='() => HandleUpdateStatus(order.Id, "Skickad")'>Skickad</button></li>
+                            <li><button class="dropdown-item text-success"
+                                          @onclick='() => HandleUpdateStatus(order.Id, "Levererad", "Betald")'>Slutförd & Betald</button>
+                            </li>
+                            <li>
+                              <hr class="dropdown-divider">
+                            </li>
+                            <li><button class="dropdown-item text-danger"
+                                          @onclick='() => HandleUpdateStatus(order.Id, "Annullerad")'>Annullera</button></li>
+                            </ul>
+                          </div>
+                                    
+                          <button class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+@code {
+  private List<OrderDto>? orders;
+  private int? openDropdownOrderId;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadOrders();
+  }
+
+  private async Task LoadOrders()
+  {
+    orders = await OrderService.GetAllOrdersAdminAsync();
+  }
+
+  private void ToggleDropdown(int orderId)
+  {
+    openDropdownOrderId = (openDropdownOrderId == orderId) ? null : orderId;
+  }
+
+  private async Task HandleUpdateStatus(int orderId, string status, string? paymentStatus = null)
+  {
+    openDropdownOrderId = null;
+    bool success = await OrderService.UpdateOrderStatusAsync(orderId, status, paymentStatus);
+    if (success) await LoadOrders();
+  }
+
+  private string GetStatusClass(string status) => status switch
+  {
+    "Mottagen" => "bg-light text-dark border",
+    "Behandlas" => "bg-warning text-dark",
+    "Skickad" => "bg-primary",
+    "Levererad" => "bg-success",
+    "Annullerad" => "bg-danger",
+    _ => "bg-secondary"
+  };
+}

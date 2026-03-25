@@ -8,8 +8,6 @@ public class OrderService(HttpClient http)
   public async Task<OrderDto?> CreateOrderAsync(OrderDto orderDto)
   {
     var response = await http.PostAsJsonAsync("api/order/create", orderDto);
-    var jsonResponse = await response.Content.ReadAsStringAsync();
-    Console.WriteLine("Raw Server Response: " + jsonResponse);
     return response.IsSuccessStatusCode
         ? await response.Content.ReadFromJsonAsync<OrderDto>()
         : null;
