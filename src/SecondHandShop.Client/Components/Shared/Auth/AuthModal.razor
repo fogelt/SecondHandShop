@@ -46,7 +46,7 @@
 }
 else
 {
-  <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
+  <div class="card shadow-lg border-0" style="width: 100%; max-width: 450px;">
     <div class="text-center mb-2 pt-4">
       <h2 style="letter-spacing: 4px;">REGISTRERING</h2>
     </div>
@@ -56,28 +56,55 @@ else
 
         <div class="row">
           <div class="col-6 mb-3">
-            <label class="form-label">Förnamn</label>
-            <InputText class="form-control form-control-lg" @bind-Value="registerModel.FirstName" />
+            <label class="form-label small fw-bold">Förnamn</label>
+            <InputText class="form-control" @bind-Value="registerModel.FirstName" />
             <ValidationMessage For="@(() => registerModel.FirstName)" class="text-danger small" />
           </div>
           <div class="col-6 mb-3">
-            <label class="form-label">Efternamn</label>
-            <InputText class="form-control form-control-lg" @bind-Value="registerModel.LastName" />
+            <label class="form-label small fw-bold">Efternamn</label>
+            <InputText class="form-control" @bind-Value="registerModel.LastName" />
             <ValidationMessage For="@(() => registerModel.LastName)" class="text-danger small" />
           </div>
         </div>
+
         <div class="mb-3">
-          <label class="form-label">E-post</label>
-          <InputText type="email" class="form-control form-control-lg" @bind-Value="registerModel.Email" />
+          <label class="form-label small fw-bold">Gatuadress</label>
+          <InputText class="form-control" @bind-Value="registerModel.Address.Street" />
+          <ValidationMessage For="@(() => registerModel.Address.Street)" class="text-danger small" />
+        </div>
+
+        <div class="row">
+          <div class="col-8 mb-3">
+            <label class="form-label small fw-bold">Ort</label>
+            <InputText class="form-control" @bind-Value="registerModel.Address.City" />
+            <ValidationMessage For="@(() => registerModel.Address.City)" class="text-danger small" />
+          </div>
+          <div class="col-4 mb-3">
+            <label class="form-label small fw-bold">Postnr</label>
+            <InputText class="form-control" @bind-Value="registerModel.Address.ZipCode" />
+            <ValidationMessage For="@(() => registerModel.Address.ZipCode)" class="text-danger small" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Land</label>
+          <InputText class="form-control" @bind-Value="registerModel.Address.Country" />
+          <ValidationMessage For="@(() => registerModel.Address.Country)" class="text-danger small" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">E-post</label>
+          <InputText type="email" class="form-control" @bind-Value="registerModel.Email" />
           <ValidationMessage For="@(() => registerModel.Email)" class="text-danger small" />
         </div>
+
         <div class="mb-3">
-          <label class="form-label">Lösenord</label>
-          <InputText type="password" class="form-control form-control-lg" @bind-Value="registerModel.Password" />
+          <label class="form-label small fw-bold">Lösenord</label>
+          <InputText type="password" class="form-control" @bind-Value="registerModel.Password" />
           <ValidationMessage For="@(() => registerModel.Password)" class="text-danger small" />
         </div>
 
-        <button type="submit" class="btn btn-dark btn-lg w-100 mt-2">
+        <button type="submit" class="btn btn-dark btn-lg w-100 mt-3">
           <i class="bi bi-person-plus me-2"></i>Skapa konto
         </button>
       </EditForm>

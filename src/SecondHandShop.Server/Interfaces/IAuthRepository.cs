@@ -15,4 +15,5 @@ public interface IAuthRepository
   Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken);
   Task<bool> LogoutAsync(string refreshToken, string userId);
   Task<ApplicationUser?> GetUserByEmailAsync(string email);
+  Task<UpdateUserDto?> GetUserForUpdateAsync(string id);
 }
