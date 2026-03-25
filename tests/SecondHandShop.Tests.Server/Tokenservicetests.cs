@@ -13,6 +13,9 @@ public class TokenServiceTests
 {
     private readonly TokenService _sut;
     private readonly ApplicationDbContext _context;
+    private readonly ApplicationUser _user;
+
+
 
     public TokenServiceTests()
     {
@@ -29,14 +32,10 @@ public class TokenServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
+        
         _context = new ApplicationDbContext(options);
         _sut = new TokenService(config, _context);
-    }
-
-    [Fact]
-    public void CreateToken_ReturnsValidToken()
-    {
-        var user = new ApplicationUser
+        _user = new ApplicationUser
         {
             Id = "1",
             Email = "test@test.com",
@@ -45,7 +44,14 @@ public class TokenServiceTests
             LastName = "Testsson"
         };
 
-        var token = _sut.CreateToken(user, new List<string> { "User" });
+    }
+
+    [Fact]
+    public void CreateToken_ReturnsValidToken()
+    {
+        
+
+        var token = _sut.CreateToken(_user, ["User"]);
 
         Assert.False(string.IsNullOrEmpty(token));
 
@@ -56,16 +62,9 @@ public class TokenServiceTests
     [Fact]
     public async Task CreateRefreshToken_SavesToDatabase()
     {
-        var user = new ApplicationUser
-        {
-            Id = "1",
-            Email = "test@test.com",
-            UserName = "test",
-            FirstName = "Test",
-            LastName = "Testsson"
-        };
+       
 
-        var result = await _sut.CreateRefreshTokenAsync(user);
+        var result = await _sut.CreateRefreshTokenAsync(_user);
 
         Assert.False(string.IsNullOrEmpty(result.Token));
         Assert.Equal(1, await _context.Set<RefreshToken>().CountAsync());
