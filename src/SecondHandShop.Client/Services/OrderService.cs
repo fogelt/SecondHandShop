@@ -1,16 +1,21 @@
-using System.Net.Http.Json;
+using System.Text.Json;
 using SecondHandShop.Shared.DTOs;
 
 namespace SecondHandShop.Client.Services;
 
-public class OrderService(HttpClient http)
+public class OrderService(HttpClient http, CartService cartService)
 {
-  public async Task<OrderDto?> CreateOrderAsync(OrderDto orderDto)
+  public async Task<OrderDto?> ConfirmPaymentAsync(string sessionId)
   {
-    var response = await http.PostAsJsonAsync("api/order/create", orderDto);
-    return response.IsSuccessStatusCode
-        ? await response.Content.ReadFromJsonAsync<OrderDto>()
-        : null;
+    var response = await http.GetAsync($"api/order/confirm-payment/{sessionId}");
+
+    if (response.IsSuccessStatusCode)
+    {
+      var order = await response.Content.ReadFromJsonAsync<OrderDto>();
+      await cartService.ClearCartAsync();
+      return order;
+    }
+    return null;
   }
 
   public async Task<List<OrderDto>> GetMyOrdersAsync()
@@ -21,6 +26,17 @@ public class OrderService(HttpClient http)
   public async Task<OrderDto?> GetOrderDetailsAsync(int id)
   {
     return await http.GetFromJsonAsync<OrderDto>($"api/order/{id}");
+  }
+
+  public async Task<string?> GetStripeCheckoutUrl(OrderDto orderDto)
+  {
+    var response = await http.PostAsJsonAsync("api/payments/create-checkout-session", orderDto);
+    if (response.IsSuccessStatusCode)
+    {
+      var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+      return result.GetProperty("url").GetString();
+    }
+    return null;
   }
 
   // ADMIN
