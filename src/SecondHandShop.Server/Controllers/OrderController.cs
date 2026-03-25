@@ -11,56 +11,40 @@ namespace SecondHandShop.Server.Controllers;
 [ApiController]
 public class OrderController(IOrderRepository orderRepo) : ControllerBase
 {
-  private string? GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                               ?? User.FindFirst("nameid")?.Value;
-
   [HttpPost("create")]
   public async Task<IActionResult> CreateOrder([FromBody] Order order)
   {
-    var userId = GetUserId();
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     if (userId == null) return Unauthorized();
 
     order.UserId = userId;
-
-    try
-    {
-      var result = await orderRepo.CreateOrderAsync(order);
-      return Ok(result);
-    }
-    catch (Exception ex)
-    {
-      return BadRequest($"Fel: {ex.Message}");
-    }
+    return Ok(await orderRepo.CreateOrderAsync(order));
   }
 
   [HttpGet("my-orders")]
   public async Task<IActionResult> GetMyOrders()
   {
-    var userId = GetUserId();
-    if (userId == null) return Unauthorized();
-
-    var orders = await orderRepo.GetUserOrdersAsync(userId);
-    return Ok(orders);
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    return Ok(await orderRepo.GetUserOrdersAsync(userId!));
   }
+
+  [Authorize(Roles = "Admin")]
+  [HttpGet("admin/all")]
+  public async Task<IActionResult> GetAllOrders() => Ok(await orderRepo.GetAllOrdersAdminAsync());
 
   [HttpGet("{id}")]
-  public async Task<IActionResult> GetOrderDetails(int id)
+  public async Task<IActionResult> GetDetails(int id)
   {
-    var userId = GetUserId();
-    if (userId == null) return Unauthorized();
-
-    var order = await orderRepo.GetOrderByIdAsync(id, userId);
-    return order == null ? NotFound("Ordern hittades inte.") : Ok(order);
+    var userId = User.IsInRole("Admin") ? null : User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var result = await orderRepo.GetOrderDetailsAsync(id, userId);
+    return result == null ? NotFound() : Ok(result);
   }
 
-  [HttpDelete("{id}")]
-  public async Task<IActionResult> CancelOrder(int id)
+  [Authorize(Roles = "Admin")]
+  [HttpPut("admin/update-status/{id}")]
+  public async Task<IActionResult> UpdateStatus(int id, [FromQuery] string status, [FromQuery] string? paymentStatus = null)
   {
-    var userId = GetUserId();
-    if (userId == null) return Unauthorized();
-
-    var deleted = await orderRepo.DeleteOrderAsync(id, userId);
-    return deleted ? NoContent() : BadRequest("Kunde inte ta bort ordern.");
+    var success = await orderRepo.UpdateOrderStatusAsync(id, status, paymentStatus);
+    return success ? Ok() : BadRequest("Kunde inte uppdatera ordern.");
   }
-
 }

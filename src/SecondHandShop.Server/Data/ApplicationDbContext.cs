@@ -44,6 +44,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(o => o.TotalPrice).HasColumnType("decimal(18,2)");
         });
 
+        builder.Entity<Order>()
+            .Property(o => o.OrderStatus)
+            .HasConversion<string>();
+
+        builder.Entity<Order>()
+            .Property(o => o.PaymentStatus)
+            .HasConversion<string>();
+
         builder.Entity<OrderItem>(entity =>
         {
             entity.HasOne(oi => oi.Order)
