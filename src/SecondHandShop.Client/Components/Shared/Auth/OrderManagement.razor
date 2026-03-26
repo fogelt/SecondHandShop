@@ -5,9 +5,7 @@
 <div class="order-management-container">
   @if (orders == null)
   {
-    <div class="text-center py-5">
-      <div class="spinner-border text-dark"></div>
-    </div>
+    <LoadingSpinner />
   }
   else if (!orders.Any())
   {

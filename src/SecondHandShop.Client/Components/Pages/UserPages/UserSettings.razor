@@ -121,13 +121,11 @@
   [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
   private UpdateUserDto settingsModel = new UpdateUserDto();
   private bool isSubmitting = false;
-  private bool isLoading = true;
   private string? statusMessage;
   private string statusClass = "alert-success";
 
   protected override async Task OnInitializedAsync()
   {
-    isLoading = true;
     var authState = await AuthStateTask;
     var user = authState.User;
 
@@ -146,7 +144,6 @@
         }
       }
     }
-    isLoading = false;
   }
 
   private async Task HandleUpdate()

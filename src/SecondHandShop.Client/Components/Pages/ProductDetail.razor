@@ -13,7 +13,7 @@
     </a>
     @if (product == null)
     {
-        <p>Laddar produkt...</p>
+        <LoadingSpinner />
     }
     else
     {
@@ -49,14 +49,15 @@
                                 <div class="card-body">
                                     <h6 class="card-title">Edit:</h6>
                                     <h7>Name:</h7>
-									<InputText @bind-Value=product.Name/>
+                                    <InputText @bind-Value=product.Name />
                                     <h7>Description:</h7>
                                     <InputText @bind-Value=product.Description />
                                     <h7>Image-URL:</h7>
                                     <InputText @bind-Value=product.ImageUrl />
                                     <h7>Price:</h7>
                                     <InputNumber @bind-Value=product.Price />
-                                    <button class="btn btn-primary" @onclick="() => HandleUpdate(product.Id, product)">Update</button>
+                                    <button class="btn btn-primary"
+                                            @onclick="() => HandleUpdate(product.Id, product)">Update</button>
                                 </div>
                             </div>
                         }
@@ -119,5 +120,5 @@
             message = "Kunde inte uppdatera produkten.";
             messageClass = "text-danger";
         }
-	}
+    }
 }
