@@ -1,13 +1,12 @@
 @using SecondHandShop.Shared.DTOs
 @using SecondHandShop.Client.Services
 @inject OrderService OrderService
+@inject NavigationManager Nav
 
 <div class="order-management-container">
   @if (orders == null)
   {
-    <div class="text-center py-5">
-      <div class="spinner-border text-dark"></div>
-    </div>
+    <LoadingSpinner />
   }
   else if (!orders.Any())
   {
@@ -68,7 +67,7 @@
                                       @onclick='() => HandleUpdateStatus(order.Id, "Behandlas")'>Behandlas</button></li>
                           <li><button class="dropdown-item"
                                         @onclick='() => HandleUpdateStatus(order.Id, "Skickad")'>Skickad</button></li>
-                            <li><button class="dropdown-item text-success"
+                            <li><button class="dropdown-item"
                                           @onclick='() => HandleUpdateStatus(order.Id, "Levererad", "Betald")'>Slutförd & Betald</button>
                             </li>
                             <li>
@@ -79,7 +78,8 @@
                             </ul>
                           </div>
                                     
-                          <button class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;">
+                          <button class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;"
+                                  @onclick='() => Nav.NavigateTo($"/admin/orders/{order.Id}")'>
                             <i class="bi bi-eye"></i>
                           </button>
                         </div>

@@ -7,15 +7,15 @@
 
 <div class="container py-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold"><i class="bi bi-bag-check me-2"></i>Mina ordrar</h2>
+    <h2 class="fw-bold"><i class="bi bi-box-seam me-2"></i>Mina ordrar</h2>
   </div>
+  <button class="btn btn-link text-decoration-none text-dark mb-3 ps-0" @onclick='() => Nav.NavigateTo("/account")'>
+    <i class="bi bi-arrow-left"></i> Tillbaka
+  </button>
 
   @if (isLoading)
   {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-2 text-muted">Hämtar din historik...</p>
-    </div>
+    <LoadingSpinner />
   }
   else if (!orders.Any())
   {
@@ -50,11 +50,6 @@
                 <div class="col-md-2">
                   <label class="small text-muted d-block">Total</label>
                   <span class="fw-bold">@order.TotalPrice.ToString("C")</span>
-                </div>
-                <div class="col-md-3 text-end">
-                  <button class="btn btn-dark px-4" @onclick='() => Nav.NavigateTo($"/order-details/{order.Id}")'>
-                    Visa detaljer
-                  </button>
                 </div>
               </div>
             </div>

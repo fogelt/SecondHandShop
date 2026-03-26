@@ -28,23 +28,27 @@ public class PaymentController(IConfiguration config) : ControllerBase
           ProductData = new SessionLineItemPriceDataProductDataOptions
           {
             Name = item.ProductName,
-            Images = new List<string> { item.ProductImageUrl }
           },
         },
-        Quantity = item.Quantity,
+        Quantity = 1,
       }).ToList(),
       Mode = "payment",
 
-      Metadata = new Dictionary<string, string> { { "OrderData", System.Text.Json.JsonSerializer.Serialize(orderDto) } },
+      Metadata = new Dictionary<string, string>
+        {
+            { "Street", orderDto.ShippingStreet },
+            { "City", orderDto.ShippingCity },
+            { "Zip", orderDto.ShippingZipCode },
+            { "ProductIds", string.Join(",", orderDto.OrderItems.Select(i => i.ProductId)) }
+        },
+
       SuccessUrl = $"{config["AppUrl"]}/order-success/{{CHECKOUT_SESSION_ID}}",
       CancelUrl = $"{config["AppUrl"]}/payment-cancelled",
     };
 
     var service = new SessionService();
     Session session = await service.CreateAsync(options);
-
     return Ok(new { Url = session.Url });
   }
-
 
 }

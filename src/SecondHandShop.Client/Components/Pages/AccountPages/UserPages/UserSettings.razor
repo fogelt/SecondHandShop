@@ -2,16 +2,17 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @inject UserService UserService
+@inject NavigationManager Nav
 
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <a href="account" class="text-decoration-none text-muted small fw-medium">
-        <i class="bi bi-chevron-left"></i> Tillbaka till konto
-      </a>
       <div class="d-flex align-items-center m-2">
         <div>
-          <h2 class="fw-bold mb-0"><i class="bi bi-person-gear me-2"></i>Kontoinställningar</h2>
+          <h2 class="fw-bold mb-3"><i class="bi bi-person-gear me-2"></i>Kontoinställningar</h2>
+          <button class="btn btn-link text-decoration-none text-dark ps-0" @onclick='() => Nav.NavigateTo("/account")'>
+            <i class="bi bi-arrow-left"></i> Tillbaka
+          </button>
         </div>
       </div>
 
@@ -121,13 +122,11 @@
   [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
   private UpdateUserDto settingsModel = new UpdateUserDto();
   private bool isSubmitting = false;
-  private bool isLoading = true;
   private string? statusMessage;
   private string statusClass = "alert-success";
 
   protected override async Task OnInitializedAsync()
   {
-    isLoading = true;
     var authState = await AuthStateTask;
     var user = authState.User;
 
@@ -146,7 +145,6 @@
         }
       }
     }
-    isLoading = false;
   }
 
   private async Task HandleUpdate()

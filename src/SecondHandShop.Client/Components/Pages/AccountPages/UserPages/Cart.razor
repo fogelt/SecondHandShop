@@ -5,13 +5,16 @@
 @inject NavigationManager Nav
 
 <div class="container mt-5">
-  <h2 class="mb-4 fw-bold">Hanterar din korg</h2>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-cart3 me-2"></i>Min Varukorg</h2>
+  </div>
+  <button class="btn btn-link text-decoration-none text-dark mb-3 ps-0" @onclick='() => Nav.NavigateTo("/account")'>
+    <i class="bi bi-arrow-left"></i> Tillbaka
+  </button>
 
   @if (isLoading)
   {
-    <div class="text-center my-5">
-      <div class="spinner-border text-primary"></div>
-    </div>
+    <LoadingSpinner />
   }
   else if (!CartService.CartItems.Any())
   {
@@ -41,14 +44,14 @@
             </div>
             <div class="d-flex justify-content-between mb-3">
               <span>Frakt</span>
-              <span class="text-success">0 kr</span>
+              <span class="">0 kr</span>
             </div>
             <hr>
             <div class="d-flex justify-content-between fw-bold fs-4 mb-4">
               <span>Totalt</span>
               <span>@CartService.GetTotal().ToString("C")</span>
             </div>
-            <button class="btn btn-success btn-lg w-100 py-3 fw-bold" @onclick='() => Nav.NavigateTo("/checkout")'>
+            <button class="btn btn-dark btn-lg w-100 py-3 fw-bold" @onclick='() => Nav.NavigateTo("/checkout")'>
               Gå till kassan <i class="bi bi-arrow-right ms-2"></i>
             </button>
           </div>
