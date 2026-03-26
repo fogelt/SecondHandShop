@@ -1,0 +1,71 @@
+@using SecondHandShop.Shared.DTOs
+@using SecondHandShop.Client.Services
+@inject ProductService UserService
+@inject NavigationManager Navigation
+
+<div class="user-management-container">
+    @if (products == null)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-dark"></div>
+        </div>
+    }
+    else
+    {
+        <div class="user-list">
+            @foreach (ProductDto user in products)
+            {
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body p-3">
+                        <div class="row align-items-center g-3">
+                            <div class="col-12 col-md-5">
+                                <div class="d-flex align-items-center">
+                                    <img src=@user.ImageUrl style="width: 45px; height: 45px;" />
+                                    <div class="text-truncate">
+                                        <h6 class="fw-bold mb-0">@user.Name | @user.Price Kr</h6>
+                                        <small title="@user.Description" class="text-muted">@user.Description</small>
+                                    </div>
+                                </div>
+                            </div>
+                                <button title="Delete" class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleDelete(user)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            <button title="Update" class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleUpdateNav(user.Id)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<ProductDto>? products;
+    private int? openDropdownUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await UserService.GetAllProductsAsync();
+    }
+
+    private void ToggleDropdown(int userId)
+    {
+        if (openDropdownUserId == userId) openDropdownUserId = null;
+        else openDropdownUserId = userId;
+    }
+
+    private async Task HandleDelete(ProductDto user)
+    {
+        if (await UserService.DeleteProductAsync(user.Id))
+        {
+            products?.Remove(user);
+        }
+    }
+
+    private async Task HandleUpdateNav(int id)
+    {
+        Navigation.NavigateTo($"/products/{id}");
+    }
+}
