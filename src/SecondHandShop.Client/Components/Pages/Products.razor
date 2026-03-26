@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
 @using SecondHandShop.Shared.DTOs
 @inject ProductService ProductService
 @inject HttpClient Http
@@ -33,11 +34,48 @@
     }
 </div>
 
+<AuthorizeView>
+    <Authorized>
+        @if (context.User.IsInRole("Admin"))
+        {
+            <div class="container mt-5 card p-5">
+                <div class="card-body">
+                    <h6 class="card-title">Create:</h6>
+                    <h7>Name:</h7>
+                    <InputText @bind-Value=newName />
+                    <h7>Description:</h7>
+                    <InputText @bind-Value=newDescription />
+                    <h7>Image-URL:</h7>
+                    <InputText @bind-Value=newImg />
+                    <h7>Price:</h7>
+                    <InputNumber @bind-Value=newPrice />
+                    <button class="btn btn-primary" @onclick="() => HandleCreate()">Create New Product</button>
+                </div>
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
 @code {
     private List<ProductDto>? products;
+    private string newName = string.Empty;
+    private string newDescription = string.Empty;
+    private string newImg = string.Empty;
+    private int newPrice;
 
     protected override async Task OnInitializedAsync()
     {
         products = await ProductService.GetAllProductsAsync();
+    }
+
+    private async Task HandleCreate()
+    {
+        await ProductService.CreateProductAsync(new ProductDto
+        {
+            Name = newName,
+            Description = newDescription,
+            Price = newPrice,
+            ImageUrl = newImg
+		});
     }
 }

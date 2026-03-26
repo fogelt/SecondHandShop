@@ -31,7 +31,7 @@ public class TokenServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        
+
         _context = new ApplicationDbContext(options);
         _sut = new TokenService(config, _context);
         _user = new ApplicationUser
@@ -48,7 +48,7 @@ public class TokenServiceTests
     [Fact]
     public void CreateToken_ReturnsValidToken()
     {
-        
+
 
         var token = _sut.CreateToken(_user, ["User"]);
 
@@ -61,7 +61,7 @@ public class TokenServiceTests
     [Fact]
     public async Task CreateRefreshToken_SavesToDatabase()
     {
-       
+
 
         var result = await _sut.CreateRefreshTokenAsync(_user);
 

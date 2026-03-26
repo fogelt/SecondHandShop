@@ -75,4 +75,25 @@ public class ProductsRepository(ApplicationDbContext context) : IProductsReposit
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<Product>> GetProductsByListAsync(List<int> ids)
+    {
+        return await _context.Products
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync();
+    }
+
+    public async Task MarkProductsAsSoldAsync(IEnumerable<int> ids)
+    {
+        var products = await _context.Products
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync();
+
+        foreach (var product in products)
+        {
+            product.IsSold = true;
+        }
+
+        await _context.SaveChangesAsync();
+    }
 }
