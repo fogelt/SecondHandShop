@@ -17,4 +17,22 @@ public record RegisterRequestDto
 
     [Required(ErrorMessage = "Efternamn krävs")]
     public string LastName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Adressuppgifter krävs")]
+    public AddressRegistrationDto Address { get; set; } = new();
+}
+
+public record AddressRegistrationDto
+{
+    [Required(ErrorMessage = "Gatuadress krävs")]
+    public string Street { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Ort krävs")]
+    public string City { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Postnummer krävs")]
+    public string ZipCode { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Land krävs")]
+    public string Country { get; set; } = "Sverige";
 }

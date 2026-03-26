@@ -99,4 +99,11 @@ public class AuthController(IAuthRepository authRepo) : ControllerBase
     var success = await authRepo.LogoutAsync(refreshToken, userId!);
     return success ? NoContent() : NotFound();
   }
+
+  [HttpGet("user-settings/{id}")]
+  public async Task<ActionResult<UpdateUserDto>> GetUserSettings(string id)
+  {
+    var userDto = await authRepo.GetUserForUpdateAsync(id);
+    return userDto != null ? Ok(userDto) : NotFound();
+  }
 }

@@ -1,4 +1,3 @@
-using SecondHandShop.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using SecondHandShop.Shared.Enums;
 using Microsoft.EntityFrameworkCore;

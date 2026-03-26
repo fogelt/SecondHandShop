@@ -1,4 +1,3 @@
-using SecondHandShop.Shared.Models;
 using SecondHandShop.Server.Models;
 
 namespace SecondHandShop.Server.Interfaces;

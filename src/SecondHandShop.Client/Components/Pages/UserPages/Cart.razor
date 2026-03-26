@@ -48,7 +48,9 @@
               <span>Totalt</span>
               <span>@CartService.GetTotal().ToString("C")</span>
             </div>
-            <button class="btn btn-success btn-lg w-100 py-3 fw-bold">Slutför köp</button>
+            <button class="btn btn-success btn-lg w-100 py-3 fw-bold" @onclick='() => Nav.NavigateTo("/checkout")'>
+              Gå till kassan <i class="bi bi-arrow-right ms-2"></i>
+            </button>
           </div>
         </div>
       </div>

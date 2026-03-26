@@ -4,7 +4,6 @@ using SecondHandShop.Server.Data;
 using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Server.Models;
 using SecondHandShop.Shared.DTOs;
-using SecondHandShop.Shared.Models;
 
 namespace SecondHandShop.Server.Repositories;
 
@@ -39,10 +38,24 @@ public class AuthRepository(
     };
 
     var result = await userManager.CreateAsync(user, dto.Password);
+
     if (result.Succeeded)
     {
       await userManager.AddToRoleAsync(user, "User");
+
+      var address = new Address
+      {
+        UserId = user.Id,
+        Street = dto.Address.Street,
+        City = dto.Address.City,
+        ZipCode = dto.Address.ZipCode,
+        Country = dto.Address.Country
+      };
+
+      context.Addresses.Add(address);
+      await context.SaveChangesAsync();
     }
+
     return result;
   }
 
@@ -137,7 +150,10 @@ public class AuthRepository(
 
   public async Task<(IdentityResult Result, AuthResponseDto? Response)> UpdateUserAsync(string id, UpdateUserDto model)
   {
-    var user = await userManager.FindByIdAsync(id);
+    var user = await context.Users
+        .Include(u => u.Addresses)
+        .FirstOrDefaultAsync(u => u.Id == id);
+
     if (user == null)
       return (IdentityResult.Failed(new IdentityError { Description = "User not found" }), null);
 
@@ -145,6 +161,15 @@ public class AuthRepository(
     user.LastName = model.LastName;
     user.Email = model.Email;
     user.UserName = model.Email;
+
+    var address = user.Addresses.FirstOrDefault();
+    if (address != null)
+    {
+      address.Street = model.Address.Street;
+      address.City = model.Address.City;
+      address.ZipCode = model.Address.ZipCode;
+      address.Country = model.Address.Country;
+    }
 
     var result = await userManager.UpdateAsync(user);
 
@@ -161,5 +186,31 @@ public class AuthRepository(
     }
 
     return (result, null);
+  }
+
+  public async Task<UpdateUserDto?> GetUserForUpdateAsync(string id)
+  {
+    var user = await context.Users
+        .Include(u => u.Addresses)
+        .FirstOrDefaultAsync(u => u.Id == id);
+
+    if (user == null) return null;
+
+    var addr = user.Addresses.FirstOrDefault();
+
+    return new UpdateUserDto
+    {
+      Id = user.Id,
+      FirstName = user.FirstName,
+      LastName = user.LastName,
+      Email = user.Email!,
+      Address = new AddressRegistrationDto
+      {
+        Street = addr?.Street ?? "",
+        City = addr?.City ?? "",
+        ZipCode = addr?.ZipCode ?? "",
+        Country = addr?.Country ?? ""
+      }
+    };
   }
 }

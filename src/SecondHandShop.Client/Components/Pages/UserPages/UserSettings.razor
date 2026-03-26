@@ -1,0 +1,172 @@
+@page "/user-settings"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject UserService UserService
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <a href="account" class="text-decoration-none text-muted small fw-medium">
+        <i class="bi bi-chevron-left"></i> Tillbaka till konto
+      </a>
+      <div class="d-flex align-items-center m-2">
+        <div>
+          <h2 class="fw-bold mb-0"><i class="bi bi-person-gear me-2"></i>Kontoinställningar</h2>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <EditForm Model="settingsModel" OnValidSubmit="HandleUpdate">
+            <DataAnnotationsValidator />
+
+            <hr class=" text-muted" />
+            <h5 class="mb-3 text-secondary fw-light text-end text-uppercase"
+                style="letter-spacing: 2px; font-size: 0.9rem;">
+              ANVÄNDARUPPGIFTER
+            </h5>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Förnamn</label>
+                <InputText @bind-Value="settingsModel.FirstName" class="form-control" />
+                <ValidationMessage For="@(() => settingsModel.FirstName)" class="text-danger small" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Efternamn</label>
+                <InputText @bind-Value="settingsModel.LastName" class="form-control" />
+                <ValidationMessage For="@(() => settingsModel.LastName)" class="text-danger small" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">E-postadress</label>
+              <InputText @bind-Value="settingsModel.Email" class="form-control" />
+              <ValidationMessage For="@(() => settingsModel.Email)" class="text-danger small" />
+            </div>
+
+            <hr class=" text-muted" />
+            <h5 class="mb-3 text-secondary fw-light text-end text-uppercase"
+                style="letter-spacing: 2px; font-size: 0.9rem;">
+              Leveransadress
+            </h5>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Gatuadress</label>
+              <InputText @bind-Value="settingsModel.Address.Street" class="form-control" />
+              <ValidationMessage For="@(() => settingsModel.Address.Street)" class="text-danger small" />
+            </div>
+
+            <div class="row">
+              <div class="col-md-8 mb-3">
+                <label class="form-label fw-semibold">Ort</label>
+                <InputText @bind-Value="settingsModel.Address.City" class="form-control" />
+                <ValidationMessage For="@(() => settingsModel.Address.City)" class="text-danger small" />
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">Postnr</label>
+                <InputText @bind-Value="settingsModel.Address.ZipCode" class="form-control" />
+                <ValidationMessage For="@(() => settingsModel.Address.ZipCode)" class="text-danger small" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Land</label>
+              <InputText @bind-Value="settingsModel.Address.Country" class="form-control" />
+              <ValidationMessage For="@(() => settingsModel.Address.Country)" class="text-danger small" />
+            </div>
+
+            <hr class=" text-muted" />
+            <h5 class="mb-3 text-secondary text-end fw-light text-uppercase"
+                style="letter-spacing: 2px; font-size: 0.9rem;">
+              Byt lösenord
+            </h5>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Nytt lösenord <span
+                class="text-muted fw-light">(valfritt)</span></label>
+                <InputText type="password" @bind-Value="settingsModel.NewPassword" class="form-control" />
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-semibold">Bekräfta nytt lösenord</label>
+                <InputText type="password" @bind-Value="settingsModel.ConfirmPassword" class="form-control" />
+                <ValidationMessage For="@(() => settingsModel.ConfirmPassword)" class="text-danger small" />
+              </div>
+
+              @if (!string.IsNullOrEmpty(statusMessage))
+              {
+                <div class="alert @statusClass fade show mb-4" role="alert">
+                  @statusMessage
+                </div>
+              }
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-dark py-2" disabled="@isSubmitting">
+                  @if (isSubmitting)
+                  {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                  }
+                  Spara ändringar
+                </button>
+              </div>
+            </EditForm>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+@code {
+  [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+  private UpdateUserDto settingsModel = new UpdateUserDto();
+  private bool isSubmitting = false;
+  private bool isLoading = true;
+  private string? statusMessage;
+  private string statusClass = "alert-success";
+
+  protected override async Task OnInitializedAsync()
+  {
+    isLoading = true;
+    var authState = await AuthStateTask;
+    var user = authState.User;
+
+    if (user.Identity?.IsAuthenticated == true)
+    {
+      var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? user.FindFirst("nameid")?.Value;
+
+      if (!string.IsNullOrEmpty(userId))
+      {
+        UpdateUserDto? dbData = await UserService.GetUserSettingsAsync(userId);
+                
+        if (dbData != null)
+        {
+          settingsModel = dbData;
+        }
+      }
+    }
+    isLoading = false;
+  }
+
+  private async Task HandleUpdate()
+  {
+    isSubmitting = true;
+    statusMessage = null;
+
+    var errorMessage = await UserService.UpdateUserAsync(settingsModel);
+
+    if (errorMessage == null)
+    {
+      statusMessage = "Dina ändringar har sparats!";
+      statusClass = "alert-success";
+    }
+    else
+    {
+      statusMessage = errorMessage;
+      statusClass = "alert-danger";
+    }
+
+    isSubmitting = false;
+  }
+}

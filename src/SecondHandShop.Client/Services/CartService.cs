@@ -48,6 +48,7 @@ public class CartService(HttpClient http, AuthUtility authUtil)
     return false;
   }
 
+  public async Task ClearCartAsync() => CartItems.Clear();
   public decimal GetTotal() => CartItems.Sum(x => x.Total);
   public int GetTotalItems() => CartItems.Sum(x => x.Quantity);
 }
