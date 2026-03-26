@@ -51,6 +51,12 @@
                     <InputNumber @bind-Value=newPrice />
                     <button class="btn btn-primary" @onclick="() => HandleCreate()">Create New Product</button>
                 </div>
+                <div>
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <p class="small mt-2 @messageClass">@message</p>
+                    }
+                </div>
             </div>
         }
     </Authorized>
@@ -62,6 +68,8 @@
     private string newDescription = string.Empty;
     private string newImg = string.Empty;
     private int newPrice;
+    private string? message;
+    private string messageClass = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,12 +78,23 @@
 
     private async Task HandleCreate()
     {
-        await ProductService.CreateProductAsync(new ProductDto
+        bool success = await ProductService.CreateProductAsync(new ProductDto
         {
             Name = newName,
             Description = newDescription,
             Price = newPrice,
             ImageUrl = newImg
-		});
+        });
+
+        if (success)
+        {
+            message = "Produkt Skapad!";
+            messageClass = "text-success";
+        }
+        else
+        {
+            message = "Kunde Inte Skapa produkt!";
+            messageClass = "text-danger";
+        }
     }
 }
