@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using SecondHandShop.Server.Data;
 using SecondHandShop.Server.Models;
 using SecondHandShop.Server.Services;
-using SecondHandShop.Shared.Models;
 using Xunit;
 
 namespace SecondHandShop.Tests.Services;
