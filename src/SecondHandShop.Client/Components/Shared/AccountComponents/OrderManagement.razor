@@ -43,7 +43,7 @@
               </div>
 
               <div class="col-6 col-md-2">
-                <span class="badge rounded-pill @GetStatusClass(order.OrderStatus) px-3 py-2">
+                <span class="badge @GetStatusClass(order.OrderStatus) px-3 py-2">
                   @order.OrderStatus
                 </span>
               </div>
@@ -68,7 +68,7 @@
                           <li><button class="dropdown-item"
                                         @onclick='() => HandleUpdateStatus(order.Id, "Skickad")'>Skickad</button></li>
                             <li><button class="dropdown-item"
-                                          @onclick='() => HandleUpdateStatus(order.Id, "Levererad", "Betald")'>Slutförd & Betald</button>
+                                          @onclick='() => HandleUpdateStatus(order.Id, "Levererad", "Betald")'>Levererad</button>
                             </li>
                             <li>
                               <hr class="dropdown-divider">
