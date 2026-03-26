@@ -12,19 +12,33 @@ public class CartRepository(ApplicationDbContext context) : ICartRepository
 
   public async Task<IEnumerable<CartItemDto>> GetUserCartAsync(string userId)
   {
-    return await _context.CartItems
+    var cartItems = await _context.CartItems
         .Where(ci => ci.UserId == userId)
         .Include(ci => ci.Product)
-        .Select(ci => new CartItemDto
-        {
-          ProductId = ci.ProductId,
-          ProductName = ci.Product.Name,
-          Price = ci.Product.Price,
-          ImageUrl = ci.Product.ImageUrl,
-          Quantity = ci.Quantity
-        }).ToListAsync();
-  }
+        .ToListAsync();
 
+    var soldItems = cartItems.Where(ci => ci.Product.IsSold).ToList();
+
+    if (soldItems.Any())
+    {
+      _context.CartItems.RemoveRange(soldItems);
+      await _context.SaveChangesAsync();
+
+      foreach (var item in soldItems)
+      {
+        cartItems.Remove(item);
+      }
+    }
+
+    return cartItems.Select(ci => new CartItemDto
+    {
+      ProductId = ci.ProductId,
+      ProductName = ci.Product.Name,
+      Price = ci.Product.Price,
+      ImageUrl = ci.Product.ImageUrl,
+      Quantity = 1
+    });
+  }
   public async Task<bool> AddToCartAsync(string userId, int productId)
   {
     var existingItem = await _context.CartItems
