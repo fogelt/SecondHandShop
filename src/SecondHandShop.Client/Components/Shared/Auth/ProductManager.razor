@@ -6,9 +6,7 @@
 <div class="user-management-container">
     @if (products == null)
     {
-        <div class="text-center py-5">
-            <div class="spinner-border text-dark"></div>
-        </div>
+        <LoadingSpinner />
     }
     else
     {
@@ -27,15 +25,17 @@
                                     </div>
                                 </div>
                             </div>
-                                <button title="Delete" class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleDelete(user)">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            <button title="Update" class="btn btn-dark btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleUpdateNav(user.Id)">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                            </div>
-                            </div>
+                            <button title="Delete" class="btn btn-dark btn-sm rounded-circle"
+                                    style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleDelete(user)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button title="Update" class="btn btn-dark btn-sm rounded-circle"
+                                    style="width: 32px; height: 32px; padding: 0;" @onclick="() => HandleUpdateNav(user.Id)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
                         </div>
+                    </div>
+                </div>
             }
         </div>
     }
