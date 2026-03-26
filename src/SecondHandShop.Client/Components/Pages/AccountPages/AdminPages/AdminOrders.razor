@@ -1,0 +1,93 @@
+@page "/admin/orders/{OrderId:int}"
+@using SecondHandShop.Shared.DTOs
+@using SecondHandShop.Client.Services
+@inject OrderService OrderService
+@inject NavigationManager Nav
+
+<div class="container py-4">
+  <button class="btn btn-link text-decoration-none text-dark mb-3 ps-0" @onclick='() => Nav.NavigateTo("/account")'>
+    <i class="bi bi-arrow-left"></i> Tillbaka
+  </button>
+
+  @if (order == null)
+  {
+    <LoadingSpinner />
+  }
+  else
+  {
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div>
+                <h4 class="fw-bold mb-1">Order #@order.Id</h4>
+                <p class="text-muted small mb-0">Placerad @order.OrderDate.ToString("f")</p>
+              </div>
+              <span class="badge rounded-pill bg-primary px-3 py-2">@order.OrderStatus</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Produkt</th>
+                    <th class="text-end">Pris</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach (var item in order.OrderItems)
+                  {
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          @if (!string.IsNullOrEmpty(item.ProductImageUrl))
+                          {
+                            <img src="@item.ProductImageUrl" class="rounded me-3"
+                                 style="width: 50px; height: 50px; object-fit: cover;" />
+                          }
+                          <span class="fw-medium">@item.ProductName</span>
+                        </div>
+                      </td>
+                      <td class="text-end">@item.UnitPrice.ToString("C")</td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td class="fw-bold pt-3">Totalt</td>
+                    <td class="fw-bold pt-3 text-end fs-5">@order.TotalPrice.ToString("C")</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3">Kundinformation</h6>
+            <p class="mb-1">@order.CustomerName</p>
+            <p class="text-muted small">@order.CustomerEmail</p>
+            <hr />
+            <h6 class="fw-bold mb-3">Leveransadress</h6>
+            <p class="mb-0 small text-muted">@order.ShippingStreet</p>
+            <p class="mb-0 small text-muted">@order.ShippingZipCode @order.ShippingCity</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@code {
+  [Parameter] public int OrderId { get; set; }
+  private OrderDto? order;
+
+  protected override async Task OnInitializedAsync()
+  {
+    order = await OrderService.GetOrderDetailsAsync(OrderId);
+  }
+}
