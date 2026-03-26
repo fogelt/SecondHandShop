@@ -8,6 +8,7 @@ public class CartService(HttpClient http, AuthUtility authUtil)
   private readonly HttpClient _http = http;
   private readonly AuthUtility _authUtil = authUtil;
   public List<CartItemDto> CartItems { get; private set; } = [];
+  public event Action? OnChange;
 
   public async Task<List<CartItemDto>> GetCartAsync()
   {
@@ -30,6 +31,7 @@ public class CartService(HttpClient http, AuthUtility authUtil)
     if (response.IsSuccessStatusCode)
     {
       await GetCartAsync();
+      NotifyStateChanged();
       return true;
     }
     return false;
@@ -43,6 +45,7 @@ public class CartService(HttpClient http, AuthUtility authUtil)
     if (response.IsSuccessStatusCode)
     {
       await GetCartAsync();
+      NotifyStateChanged();
       return true;
     }
     return false;
@@ -50,5 +53,6 @@ public class CartService(HttpClient http, AuthUtility authUtil)
 
   public async Task ClearCartAsync() => CartItems.Clear();
   public decimal GetTotal() => CartItems.Sum(x => x.Total);
-  public int GetTotalItems() => CartItems.Sum(x => x.Quantity);
+  private void NotifyStateChanged() => OnChange?.Invoke();
+  public int GetTotalItems() => CartItems.Count;
 }

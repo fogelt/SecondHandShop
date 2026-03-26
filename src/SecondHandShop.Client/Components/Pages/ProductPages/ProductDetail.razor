@@ -8,7 +8,7 @@
 @inject NavigationManager Nav
 
 <div class="container mt-5">
-    <button class="btn btn-link text-decoration-none text-dark mb-3 ps-0" @onclick='() => Nav.NavigateTo("/account")'>
+    <button class="btn btn-link text-decoration-none text-dark mb-3 ps-0" @onclick='() => Nav.NavigateTo("/")'>
         <i class="bi bi-arrow-left"></i> Tillbaka till butiken
     </button>
     @if (product == null)
@@ -30,14 +30,14 @@
                     </div>
                 }
             </div>
-            <div class="col-md-6">
-                <h2>@product.Name</h2>
-                <p class="lead text-success">@product.Price.ToString("C")</p>
+            <div class="col-md-6 card shadow-lg">
+                <h2 class="mt-3">@product.Name</h2>
+                <p class="lead">@product.Price.ToString("C")</p>
 
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h6 class="card-title">Beskrivning</h6>
-                        <p class="card-text">@product.Description</p>
+                <div class="mb-4">
+                    <div class="mt-5">
+                        <h6>Beskrivning</h6>
+                        <p>@product.Description</p>
                     </div>
                 </div>
 
@@ -63,17 +63,18 @@
                         }
                     </Authorized>
                 </AuthorizeView>
-
-                <button class="btn btn-dark btn-lg w-100 mb-2" @onclick="AddToCart">Lägg i kundvagn</button>
-
-                @if (!string.IsNullOrEmpty(message))
-                {
-                    <p class="small mt-2 @messageClass">@message</p>
-                }
+                <div class="mt-auto">
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <p class="small mt-2 @messageClass">@message</p>
+                    }
+                    <button class="btn btn-dark btn-lg w-100 mb-2" @onclick="AddToCart">Lägg i
+                        kundvagn</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
 
 @code {
     [Parameter]
@@ -97,12 +98,12 @@
             if (success)
             {
                 message = "Tillagd i kundvagnen!";
-                messageClass = "text-success";
+                messageClass = "alert alert-success mt-4 py-2 text-center small";
             }
             else
             {
                 message = "Kunde inte lägga till varan. Kontrollera inloggning.";
-                messageClass = "text-danger";
+                messageClass = "alert alert-danger mt-4 py-2 text-center small";
             }
         }
     }
