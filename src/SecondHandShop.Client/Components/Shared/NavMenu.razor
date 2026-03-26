@@ -20,16 +20,19 @@
         
         <AuthorizeView>
           <Authorized>
-            <NavLink class="nav-link position-relative" href="cart">
-              <i class="bi bi-cart3 me-1"></i> Kundvagn
-              @if (CartService.GetTotalItems() > 0)
-              {
-                <span class="position-absolute top-0 start-0 badge rounded-pill bg-danger"
-                      style="font-size: 0.6rem; z-index: 1;">
-                  @CartService.GetTotalItems()
-                </span>
-              }
-            </NavLink>
+            @if (context.User.IsInRole("User"))
+            {
+              <NavLink class="nav-link position-relative" href="cart">
+                <i class="bi bi-cart3 me-1"></i> Kundvagn
+                @if (CartService.GetTotalItems() > 0)
+                {
+                  <span class="position-absolute top-0 start-0 badge rounded-pill bg-danger"
+                        style="font-size: 0.6rem; z-index: 1;">
+                    @CartService.GetTotalItems()
+                  </span>
+                }
+              </NavLink>
+            }
           </Authorized>
         </AuthorizeView>
         <NavLink class="nav-link" href="account">
