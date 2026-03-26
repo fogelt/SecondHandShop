@@ -1,11 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SecondHandShop.Server.Interfaces;
-using SecondHandShop.Server.Models;
-using SecondHandShop.Shared.DTOs;
-using SecondHandShop.Shared.Enums;
-using Stripe.Checkout;
-using Stripe;
 using System.Security.Claims;
 
 namespace SecondHandShop.Server.Controllers;
@@ -13,28 +8,18 @@ namespace SecondHandShop.Server.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class OrderController(IOrderRepository orderRepo, IProductsRepository productRepo, IConfiguration config) : ControllerBase
+public class OrderController(IOrderService orderService, IOrderRepository orderRepo) : ControllerBase
 {
   [HttpGet("confirm-payment/{sessionId}")]
   public async Task<IActionResult> ConfirmPayment(string sessionId)
   {
-    StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
-    var session = await new SessionService().GetAsync(sessionId);
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-    if (session?.PaymentStatus != "paid")
-      return BadRequest("Betalningen kunde inte verifieras.");
+    var result = await orderService.ConfirmAndCreateOrderAsync(sessionId, userId!);
 
-    var m = session.Metadata;
-    var productIds = m["ProductIds"].Split(',').Select(int.Parse).ToList();
-
-    var products = await productRepo.GetProductsByListAsync(productIds);
-
-    var order = MapSessionToOrder(session, products);
-
-    var result = await orderRepo.CreateOrderAsync(order);
-    await productRepo.MarkProductsAsSoldAsync(productIds);
-
-    return Ok(result);
+    return result == null
+        ? BadRequest("Betalningen kunde inte verifieras.")
+        : Ok(result);
   }
 
   [HttpGet("my-orders")]
@@ -46,7 +31,8 @@ public class OrderController(IOrderRepository orderRepo, IProductsRepository pro
 
   [Authorize(Roles = "Admin")]
   [HttpGet("admin/all")]
-  public async Task<IActionResult> GetAllOrders() => Ok(await orderRepo.GetAllOrdersAdminAsync());
+  public async Task<IActionResult> GetAllOrders() =>
+      Ok(await orderRepo.GetAllOrdersAdminAsync());
 
   [HttpGet("{id}")]
   public async Task<IActionResult> GetDetails(int id)
@@ -62,26 +48,5 @@ public class OrderController(IOrderRepository orderRepo, IProductsRepository pro
   {
     var success = await orderRepo.UpdateOrderStatusAsync(id, status, paymentStatus);
     return success ? Ok() : BadRequest("Kunde inte uppdatera ordern.");
-  }
-
-  private Order MapSessionToOrder(Session session, List<Models.Product> products)
-  {
-    return new Order
-    {
-      UserId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
-      OrderDate = DateTime.Now,
-      TotalPrice = products.Sum(p => p.Price),
-      ShippingStreet = session.Metadata["Street"],
-      ShippingCity = session.Metadata["City"],
-      ShippingZipCode = session.Metadata["Zip"],
-      OrderStatus = OrderStatus.Mottagen,
-      PaymentStatus = PaymentStatus.Betald,
-      OrderItems = products.Select(p => new OrderItem
-      {
-        ProductId = p.Id,
-        Quantity = 1,
-        PriceAtPurchase = p.Price
-      }).ToList()
-    };
   }
 }

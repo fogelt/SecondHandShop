@@ -1,8 +1,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
+@inject CartService CartService
 
 <header class="card border-bottom shadow-lg">
-
   <div class="container py-3 text-center">
     <h1 class="display-6 fw-bold text-dark mb-0" style="letter-spacing: 2px">
       SECOND HAND SHOP
@@ -17,8 +17,44 @@
       <div class="navbar-nav gap-4 align-items-center">
         <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Butik</NavLink>
         <NavLink class="nav-link" href="about">Om oss</NavLink>
-        <NavLink class="nav-link" href="account"><i class="bi bi-person-circle me-2"></i>Konto</NavLink>
+        
+        <AuthorizeView>
+          <Authorized>
+            @if (context.User.IsInRole("User"))
+            {
+              <NavLink class="nav-link position-relative" href="cart">
+                <i class="bi bi-cart3 me-1"></i> Kundvagn
+                @if (CartService.GetTotalItems() > 0)
+                {
+                  <span class="position-absolute top-0 start-0 badge rounded-pill bg-danger"
+                        style="font-size: 0.6rem; z-index: 1;">
+                    @CartService.GetTotalItems()
+                  </span>
+                }
+              </NavLink>
+            }
+          </Authorized>
+        </AuthorizeView>
+        <NavLink class="nav-link" href="account">
+          <i class="bi bi-person-circle me-1"></i> Konto
+        </NavLink>
       </div>
     </div>
   </nav>
 </header>
+
+@code {
+  protected override async Task OnInitializedAsync()
+  {
+    CartService.OnChange += HandleCartChanged;
+        
+    await CartService.GetCartAsync();
+  }
+
+  private void HandleCartChanged() => StateHasChanged();
+
+  public void Dispose()
+  {
+    CartService.OnChange -= HandleCartChanged;
+  }
+}
