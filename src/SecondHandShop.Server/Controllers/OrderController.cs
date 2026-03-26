@@ -4,6 +4,8 @@ using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Server.Models;
 using SecondHandShop.Shared.DTOs;
 using SecondHandShop.Shared.Enums;
+using Stripe.Checkout;
+using Stripe;
 using System.Security.Claims;
 
 namespace SecondHandShop.Server.Controllers;
@@ -11,47 +13,28 @@ namespace SecondHandShop.Server.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class OrderController(IOrderRepository orderRepo, IConfiguration config) : ControllerBase
+public class OrderController(IOrderRepository orderRepo, IProductsRepository productRepo, IConfiguration config) : ControllerBase
 {
   [HttpGet("confirm-payment/{sessionId}")]
   public async Task<IActionResult> ConfirmPayment(string sessionId)
   {
-    Stripe.StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
-    var service = new Stripe.Checkout.SessionService();
-    var session = await service.GetAsync(sessionId);
+    StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
+    var session = await new SessionService().GetAsync(sessionId);
 
-    if (session != null && session.PaymentStatus == "paid")
-    {
-      var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-      var jsonData = session.Metadata["OrderData"];
-      var dto = System.Text.Json.JsonSerializer.Deserialize<OrderDto>(jsonData);
+    if (session?.PaymentStatus != "paid")
+      return BadRequest("Betalningen kunde inte verifieras.");
 
-      if (dto != null)
-      {
-        var order = new Order
-        {
-          UserId = userId!,
-          OrderDate = DateTime.Now,
-          TotalPrice = dto.TotalPrice,
-          ShippingStreet = dto.ShippingStreet,
-          ShippingCity = dto.ShippingCity,
-          ShippingZipCode = dto.ShippingZipCode,
-          OrderStatus = OrderStatus.Mottagen,
-          PaymentStatus = PaymentStatus.Betald,
-          OrderItems = dto.OrderItems.Select(oi => new OrderItem
-          {
-            ProductId = oi.ProductId,
-            Quantity = oi.Quantity,
-            PriceAtPurchase = oi.UnitPrice
-          }).ToList()
-        };
+    var m = session.Metadata;
+    var productIds = m["ProductIds"].Split(',').Select(int.Parse).ToList();
 
-        var result = await orderRepo.CreateOrderAsync(order);
-        return Ok(result);
-      }
-    }
+    var products = await productRepo.GetProductsByListAsync(productIds);
 
-    return BadRequest("Betalning kunde inte verifieras.");
+    var order = MapSessionToOrder(session, products);
+
+    var result = await orderRepo.CreateOrderAsync(order);
+    await productRepo.MarkProductsAsSoldAsync(productIds);
+
+    return Ok(result);
   }
 
   [HttpGet("my-orders")]
@@ -79,5 +62,26 @@ public class OrderController(IOrderRepository orderRepo, IConfiguration config) 
   {
     var success = await orderRepo.UpdateOrderStatusAsync(id, status, paymentStatus);
     return success ? Ok() : BadRequest("Kunde inte uppdatera ordern.");
+  }
+
+  private Order MapSessionToOrder(Session session, List<Models.Product> products)
+  {
+    return new Order
+    {
+      UserId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
+      OrderDate = DateTime.Now,
+      TotalPrice = products.Sum(p => p.Price),
+      ShippingStreet = session.Metadata["Street"],
+      ShippingCity = session.Metadata["City"],
+      ShippingZipCode = session.Metadata["Zip"],
+      OrderStatus = OrderStatus.Mottagen,
+      PaymentStatus = PaymentStatus.Betald,
+      OrderItems = products.Select(p => new OrderItem
+      {
+        ProductId = p.Id,
+        Quantity = 1,
+        PriceAtPurchase = p.Price
+      }).ToList()
+    };
   }
 }
