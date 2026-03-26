@@ -10,4 +10,6 @@ public interface IProductsRepository
     public Task<Product> CreateProductAsync(Product product);
     public Task<Product> UpdateProductAsync(int id, Product product);
     public Task<bool> DeleteProductAsync(int id);
+    Task<List<Product>> GetProductsByListAsync(List<int> ids);
+    Task MarkProductsAsSoldAsync(IEnumerable<int> ids);
 }
