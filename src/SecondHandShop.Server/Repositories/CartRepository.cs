@@ -27,22 +27,28 @@ public class CartRepository(ApplicationDbContext context) : ICartRepository
 
   public async Task<bool> AddToCartAsync(string userId, int productId)
   {
-    var item = await _context.CartItems
-        .FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
+    var existingItem = await _context.CartItems
+        .AnyAsync(ci => ci.UserId == userId && ci.ProductId == productId);
 
-    if (item != null)
+    if (existingItem)
     {
-      item.Quantity++;
+      return true;
     }
-    else
+
+    var product = await _context.Products
+        .FirstOrDefaultAsync(p => p.Id == productId && !p.IsSold);
+
+    if (product == null)
     {
-      _context.CartItems.Add(new CartItem
-      {
-        UserId = userId,
-        ProductId = productId,
-        Quantity = 1
-      });
+      return false;
     }
+
+    _context.CartItems.Add(new CartItem
+    {
+      UserId = userId,
+      ProductId = productId,
+      Quantity = 1
+    });
 
     return await _context.SaveChangesAsync() > 0;
   }

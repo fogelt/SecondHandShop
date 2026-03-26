@@ -11,7 +11,9 @@ public class ProductsRepository(ApplicationDbContext context) : IProductsReposit
 
     public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
     {
-        var products = await _context.Products.ToListAsync();
+        var products = await _context.Products
+            .Where(p => !p.IsSold)
+            .ToListAsync();
 
         if (products == null || !products.Any())
             return Enumerable.Empty<ProductDto>();
@@ -22,7 +24,8 @@ public class ProductsRepository(ApplicationDbContext context) : IProductsReposit
             Name = p.Name,
             Description = p.Description,
             Price = p.Price,
-            ImageUrl = p.ImageUrl
+            ImageUrl = p.ImageUrl,
+            IsSold = p.IsSold
         });
     }
 
