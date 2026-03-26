@@ -3,14 +3,14 @@
 @using SecondHandShop.Client.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject HttpClient Http
-@inject NavigationManager Nav
 @inject ProductService ProductService
 @inject CartService CartService
+@inject NavigationManager Nav
 
 <div class="container mt-5">
-    <a href="/" class="text-decoration-none text-muted small fw-medium">
-        <i class="bi bi-chevron-left"></i> Tillbaka till butiken
-    </a>
+    <button class="btn btn-link text-decoration-none text-dark mb-3 ps-0" @onclick='() => Nav.NavigateTo("/account")'>
+        <i class="bi bi-arrow-left"></i> Tillbaka till butiken
+    </button>
     @if (product == null)
     {
         <LoadingSpinner />

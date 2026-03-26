@@ -5,7 +5,12 @@
 @inject NavigationManager Nav
 
 <div class="container mt-5">
-  <h2 class="mb-4 fw-bold">Hanterar din korg</h2>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-cart3 me-2"></i>Min Varukorg</h2>
+  </div>
+  <button class="btn btn-link text-decoration-none text-dark mb-3 ps-0" @onclick='() => Nav.NavigateTo("/account")'>
+    <i class="bi bi-arrow-left"></i> Tillbaka
+  </button>
 
   @if (isLoading)
   {
