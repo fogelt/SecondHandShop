@@ -49,18 +49,7 @@ public class ProductsControllerTests
         var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
         Assert.Equal("No products found.", notFound.Value);
     }
-    /*
-    [Fact]
-    public async Task GetAll_NullResult_ReturnsNotFound()
-    {
-        _mockRepo.Setup(r => r.GetAllProductsAsync())
-                  .ReturnsAsync((IEnumerable<ProductDto>?)null);
 
-        var result = await _controller.GetAll();
-
-        Assert.IsType<NotFoundObjectResult>(result.Result);
-    }
-    */
     // ── GetById ─────────────────────────────────────────────
 
     [Fact]

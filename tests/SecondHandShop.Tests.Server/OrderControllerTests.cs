@@ -5,6 +5,7 @@ using Moq;
 using SecondHandShop.Server.Controllers;
 using SecondHandShop.Server.Interfaces;
 using SecondHandShop.Shared.DTOs;
+using SecondHandShop.Server.Services;
 using System.Security.Claims;
 using Xunit;
 
@@ -12,17 +13,15 @@ namespace SecondHandShop.Tests.Server.Controllers;
 
 public class OrderControllerTests
 {
+    private readonly Mock<IOrderService> _mockOrderService;
     private readonly Mock<IOrderRepository> _mockOrderRepo;
-    private readonly Mock<IProductsRepository> _mockProductRepo;
-    private readonly Mock<IConfiguration> _mockConfig;
     private readonly OrderController _controller;
 
     public OrderControllerTests()
     {
         _mockOrderRepo = new Mock<IOrderRepository>();
-        _mockProductRepo = new Mock<IProductsRepository>();
-        _mockConfig = new Mock<IConfiguration>();
-        _controller = new OrderController(_mockOrderRepo.Object, _mockProductRepo.Object, _mockConfig.Object);
+        _mockOrderService = new Mock<IOrderService>();
+        _controller = new OrderController(_mockOrderService.Object, _mockOrderRepo.Object);
         SetUser("user-1");
     }
 
