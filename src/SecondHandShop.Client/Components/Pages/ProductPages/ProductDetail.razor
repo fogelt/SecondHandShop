@@ -41,40 +41,79 @@
                     </div>
                 </div>
 
-                <AuthorizeView>
+                <AuthorizeView Context="authContext">
                     <Authorized>
-                        @if (context.User.IsInRole("Admin"))
+                        @if (authContext.User.IsInRole("Admin"))
                         {
-                            <div class="card mb-4">
+                            <div class="card border-warning mb-4 shadow-sm">
                                 <div class="card-body">
-                                    <h6 class="card-title">Edit:</h6>
-                                    <h7>Name:</h7>
-                                    <InputText @bind-Value=product.Name />
-                                    <h7>Description:</h7>
-                                    <InputText @bind-Value=product.Description />
-                                    <h7>Image-URL:</h7>
-                                    <InputText @bind-Value=product.ImageUrl />
-                                    <h7>Price:</h7>
-                                    <InputNumber @bind-Value=product.Price />
-                                    <button class="btn btn-primary"
-                                            @onclick="() => HandleUpdate(product.Id, product)">Update</button>
+                                    <h6 class="card-title fw-bold text-warning"><i class="bi bi-pencil-square"></i> Admin:
+                                        Redigera produkt</h6>
+                                    
+                                        <EditForm Model="product" OnValidSubmit="() => HandleUpdate(product.Id, product)">
+                                            <div class="mb-2">
+                                                <label class="small fw-bold">Namn</label>
+                                                <InputText @bind-Value="product.Name" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="small fw-bold">Beskrivning</label>
+                                                <InputTextArea @bind-Value="product.Description"
+                                                               class="form-control form-control-sm" rows="3" />
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col">
+                                                    <label class="small fw-bold">Pris</label>
+                                                    <InputNumber @bind-Value="product.Price" class="form-control form-control-sm" />
+                                                </div>
+                                                <div class="col">
+                                                    <label class="small fw-bold">Bild-URL</label>
+                                                    <InputText @bind-Value="product.ImageUrl"
+                                                               class="form-control form-control-sm" />
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">Spara
+                                                ändringar</button>
+                                            </EditForm>
+                                        </div>
+                                    </div>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
+                        <div class="mt-auto">
+                            @if (!string.IsNullOrEmpty(message))
+                            {
+                                <div class="alert @messageClass py-2 text-center small animate__animated animate__fadeIn">
+                                    @message
                                 </div>
-                            </div>
-                        }
-                    </Authorized>
-                </AuthorizeView>
-                <div class="mt-auto">
-                    @if (!string.IsNullOrEmpty(message))
-                    {
-                        <p class="small mt-2 @messageClass">@message</p>
-                    }
-                    <button class="btn btn-dark btn-lg w-100 mb-2" @onclick="AddToCart">Lägg i
-                        kundvagn</button>
+                            }
+
+                            <AuthorizeView Context="authContext">
+                                <Authorized>
+                                    @if (authContext.User.IsInRole("User"))
+                                    {
+                                        <button class="btn btn-dark btn-lg w-100 mb-2 shadow-sm" @onclick="AddToCart">
+                                            <i class="bi bi-cart-plus me-2"></i> Lägg i kundvagn
+                                        </button>
+                                    }
+                                    else if (authContext.User.IsInRole("Admin"))
+                                    {
+                                        <div class="alert alert-light text-center border small">
+                                            <i class="bi bi-info-circle me-1"></i> Du är inloggad som Admin
+                                        </div>
+                                    }
+                                </Authorized>
+                                <NotAuthorized>
+                                    <button class="btn btn-outline-dark btn-lg w-100 mb-2"
+                                            @onclick='() => Nav.NavigateTo("/account")'>
+                                        Logga in för att handla
+                                    </button>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
 
 @code {
     [Parameter]

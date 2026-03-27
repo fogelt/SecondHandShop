@@ -31,67 +31,97 @@
     }
 </div>
 
-<AuthorizeView>
+<AuthorizeView Context="authContext">
     <Authorized>
-        @if (context.User.IsInRole("Admin"))
+        @if (authContext.User.IsInRole("Admin"))
         {
-            <div class="container mt-5 card p-5">
-                <div class="card-body">
-                    <h6 class="card-title">Create:</h6>
-                    <h7>Name:</h7>
-                    <InputText @bind-Value=newName />
-                    <h7>Description:</h7>
-                    <InputText @bind-Value=newDescription />
-                    <h7>Image-URL:</h7>
-                    <InputText @bind-Value=newImg />
-                    <h7>Price:</h7>
-                    <InputNumber @bind-Value=newPrice />
-                    <button class="btn btn-primary" @onclick="() => HandleCreate()">Create New Product</button>
+            <div class="container mt-5">
+                <div class="card shadow-sm border-warning rounded-4">
+                    <div class="card-body p-5">
+                        <h6 class="card-title fw-bold text-warning"><i class="bi bi-pencil-square"></i> Admin:
+                            Skapa produkt</h6>
+                        
+                            <EditForm Model="@newProduct" OnValidSubmit="HandleCreate">
+                                <DataAnnotationsValidator />
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Produktnamn</label>
+                                    <InputText @bind-Value="newProduct.Name" class="form-control" />
+                                    <ValidationMessage For="@(() => newProduct.Name)" class="text-danger small" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Beskrivning</label>
+                                    <InputTextArea @bind-Value="newProduct.Description" class="form-control" rows="4" />
+                                    <ValidationMessage For="@(() => newProduct.Description)" class="text-danger small" />
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-8 mb-3">
+                                        <label class="form-label fw-bold">Bild-URL</label>
+                                        <InputText @bind-Value="newProduct.ImageUrl" class="form-control" />
+                                        <ValidationMessage For="@(() => newProduct.ImageUrl)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Pris (SEK)</label>
+                                        <InputNumber @bind-Value="newProduct.Price" class="form-control" />
+                                        <ValidationMessage For="@(() => newProduct.Price)" class="text-danger small" />
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-warning btn-lg w-100 mt-3 shadow-sm">
+                                    Skapa Produkt
+                                </button>
+                            </EditForm>
+
+                            @if (!string.IsNullOrEmpty(message))
+                            {
+                                <div class="alert @messageClass mt-4 py-2 text-center small">
+                                    @message
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    @if (!string.IsNullOrEmpty(message))
-                    {
-                        <p class="small mt-2 @messageClass">@message</p>
-                    }
-                </div>
-            </div>
-        }
-    </Authorized>
-</AuthorizeView>
+            }
+        </Authorized>
+    </AuthorizeView>
 
 @code {
     private List<ProductDto>? products;
-    private string newName = string.Empty;
-    private string newDescription = string.Empty;
-    private string newImg = string.Empty;
-    private int newPrice;
+    private ProductDto newProduct = new ProductDto();
+    
     private string? message;
     private string messageClass = "";
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
     {
         products = await ProductService.GetAllProductsAsync();
     }
 
     private async Task HandleCreate()
     {
-        bool success = await ProductService.CreateProductAsync(new ProductDto
-        {
-            Name = newName,
-            Description = newDescription,
-            Price = newPrice,
-            ImageUrl = newImg
-        });
+        bool success = await ProductService.CreateProductAsync(newProduct);
 
         if (success)
         {
-            message = "Produkt Skapad!";
-            messageClass = "text-success";
+            message = "Produkt skapad!";
+            messageClass = "alert-success";
+            
+            newProduct = new ProductDto();
+            
+            await LoadProducts();
         }
         else
         {
-            message = "Kunde Inte Skapa produkt!";
-            messageClass = "text-danger";
+            message = "Kunde inte skapa produkt!";
+            messageClass = "alert-danger";
         }
+        
+        StateHasChanged();
     }
 }
